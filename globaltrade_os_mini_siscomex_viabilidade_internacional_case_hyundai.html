@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GlobalTrade OS | Mini-Siscomex & Viabilidade Internacional (Case Hyundai)</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Fonte Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            hyundai: {
+              navy: '#002C5F',
+              dark: '#001A3A',
+              sky: '#00AAD2',
+              sand: '#E4DCD3',
+              light: '#F0F5FA'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #F1F5F9;
+      color: #0F172A;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      opacity: 1;
+    }
+    .card-shadow {
+      box-shadow: 0 4px 20px -2px rgba(0, 44, 95, 0.07);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Toast Flutuante (Substitui alert()) -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden transform transition-all duration-300 translate-y-4 opacity-0">
+    <div class="bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700">
+      <span class="text-cyan-400 text-lg">✔</span>
+      <p id="toastMessage" class="text-sm font-medium">Ação concluída.</p>
+    </div>
+  </div>
+
+  <!-- Cabeçalho Corporativo Estilo Portal Aduaneiro / Siscomex -->
+  <header class="bg-gradient-to-r from-[#001A3A] via-[#002C5F] to-[#004085] text-white shadow-lg sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center shrink-0">
+          <!-- Ícone SVG Globo / Contêiner Comex -->
+          <svg class="w-6 h-6 text-[#00AAD2]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">GlobalTrade OS</h1>
+            <span class="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">
+              Mini-Siscomex • Case Hyundai Autopeças
+            </span>
+          </div>
+          <p class="text-xs sm:text-sm text-blue-100/90 mt-0.5">
+            Inteligência Regulatória, Simulador de Landed Cost & Balanço de Viabilidade Internacional
+          </p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5">
+        <button onclick="resetToCurrentPreset()" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-medium transition border border-white/15 cursor-pointer">
+          Restaurar Parâmetros NCM
+        </button>
+        <button onclick="exportComexCSV()" class="px-4 py-2 rounded-xl bg-[#00AAD2] hover:bg-cyan-500 text-slate-950 text-xs sm:text-sm font-bold transition shadow-md flex items-center gap-1.5 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Exportar Parecer Comex (CSV)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 flex-1 w-full">
+
+    <!-- MÓDULO 1: Seletor de Produto/NCM & Inteligência Regulatória (Mini-Siscomex) -->
+    <section class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 card-shadow space-y-5">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-[#002C5F]">Módulo 1 • Classificação Fiscal & Anuência</span>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">1. Inteligência Regulatória & Aduaneira (Nicho Automotivo)</h2>
+        </div>
+
+        <!-- Seletor de Preset de Produto -->
+        <div class="w-full lg:w-auto min-w-[320px]">
+          <label for="productPresetSelect" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+            Selecione o Componente / Matéria-Prima (NCM):
+          </label>
+          <select id="productPresetSelect" class="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#002C5F]/30 bg-blue-50/40 text-sm font-bold text-[#002C5F] focus:outline-none focus:border-[#002C5F] transition cursor-pointer">
+            <option value="ecu">Módulo Eletrônico ECU & Telemetria (NCM 8537.10.90)</option>
+            <option value="transmission">Conjunto de Transmissão Automática CKD (NCM 8708.40.80)</option>
+            <option value="battery">Pack de Baterias Lítio-Íon Híbrido (NCM 8507.60.00)</option>
+            <option value="lighting">Sistema de Iluminação Full LED (NCM 8512.20.11)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Grid de Compliance Aduaneiro + Incoterms + Regime -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        <!-- Órgãos Anuentes e Certificações (5 cols) -->
+        <div class="lg:col-span-5 bg-slate-50 rounded-2xl p-4 border border-slate-200/80 flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Órgãos Anuentes & Certificações</span>
+              <span id="ncmDisplayBadge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-[#002C5F] text-white">NCM 8537.10.90</span>
+            </div>
+            <div id="agenciesContainer" class="flex flex-wrap gap-2">
+              <!-- Badges dinâmicos via JS -->
+            </div>
+            <p id="regulatoryNotes" class="text-xs text-slate-600 mt-3 leading-relaxed">
+              <!-- Notas regulatórias via JS -->
+            </p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-200/80 text-xs">
+            <div class="bg-white p-2.5 rounded-xl border border-slate-200/70">
+              <span class="text-[11px] text-slate-500 block">Licenciamento (DUIMP/LI)</span>
+              <strong id="liRequirement" class="text-amber-700 font-bold">LI Pré-Embarque Obrigatória</strong>
+            </div>
+            <div class="bg-white p-2.5 rounded-xl border border-slate-200/70">
+              <span class="text-[11px] text-slate-500 block">Risco Demurrage / Canal</span>
+              <strong id="customsChannelRisk" class="text-slate-800 font-bold">Canal Amarelo (Médio)</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seletor de Incoterm 2020 & Matriz de Risco (4 cols) -->
+        <div class="lg:col-span-4 bg-slate-50 rounded-2xl p-4 border border-slate-200/80 flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Incoterm 2020 Negociado</span>
+              <span id="incotermCodeBadge" class="text-xs font-extrabold px-2.5 py-0.5 rounded-md bg-cyan-100 text-cyan-900">FOB</span>
+            </div>
+
+            <!-- Botões de Incoterms -->
+            <div class="grid grid-cols-5 gap-1.5 mt-2">
+              <button type="button" data-incoterm="EXW" class="incoterm-btn py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer">EXW</button>
+              <button type="button" data-incoterm="FCA" class="incoterm-btn py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer">FCA</button>
+              <button type="button" data-incoterm="FOB" class="incoterm-btn py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer">FOB</button>
+              <button type="button" data-incoterm="CIF" class="incoterm-btn py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer">CIF</button>
+              <button type="button" data-incoterm="DDP" class="incoterm-btn py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer">DDP</button>
+            </div>
+
+            <p id="incotermDescription" class="text-xs text-slate-600 mt-3 leading-relaxed">
+              <!-- Descrição dinâmica do Incoterm -->
+            </p>
+          </div>
+
+          <!-- Barra Visual de Responsabilidade Exportador vs Importador -->
+          <div class="pt-2">
+            <div class="flex justify-between text-[11px] font-bold mb-1">
+              <span class="text-[#002C5F]" id="exporterShareText">Exportador: 35%</span>
+              <span class="text-cyan-700" id="importerShareText">Importador: 65%</span>
+            </div>
+            <div class="w-full h-2.5 bg-cyan-200 rounded-full overflow-hidden flex">
+              <div id="exporterBar" class="bg-[#002C5F] h-full transition-all duration-300" style="width: 35%"></div>
+              <div id="importerBar" class="bg-[#00AAD2] h-full transition-all duration-300" style="width: 65%"></div>
+            </div>
+            <span class="text-[10px] text-slate-400 block mt-1">Divisão de custos logísticos e risco de transferência da carga</span>
+          </div>
+        </div>
+
+        <!-- Regime Aduaneiro & Parâmetros Tributários Globais (3 cols) -->
+        <div class="lg:col-span-3 bg-slate-50 rounded-2xl p-4 border border-slate-200/80 flex flex-col justify-between space-y-3">
+          <div>
+            <label for="customsRegimeSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              Regime Aduaneiro
+            </label>
+            <select id="customsRegimeSelect" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:ring-2 focus:ring-[#002C5F] focus:outline-none cursor-pointer">
+              <option value="common">Importação Comum (Integral)</option>
+              <option value="extarifario">Ex-Tarifário (II Reduzido p/ 2%)</option>
+              <option value="drawback">Drawback Suspensão (Isenção Total)</option>
+            </select>
+            <p id="regimeEffectNote" class="text-[11px] text-slate-500 mt-1.5 leading-snug">
+              Tributação padrão aplicada sobre o Valor Aduaneiro (CIF).
+            </p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/80">
+            <div>
+              <label for="inputExchangeRate" class="block text-[10px] font-bold text-slate-600">Câmbio (R$/USD)</label>
+              <input type="number" id="inputExchangeRate" step="0.05" min="1" value="5.65"
+                class="w-full mt-0.5 px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:ring-2 focus:ring-[#002C5F] focus:outline-none" />
+            </div>
+            <div>
+              <label for="inputCapitalCost" class="block text-[10px] font-bold text-slate-600">Custo Capital (%/mês)</label>
+              <input type="number" id="inputCapitalCost" step="0.1" min="0" value="1.15"
+                class="w-full mt-0.5 px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:ring-2 focus:ring-[#002C5F] focus:outline-none" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Linha de Alíquotas Editáveis + Preço de Venda/Aplicação -->
+      <div class="bg-blue-50/50 rounded-xl p-3.5 border border-blue-100 grid grid-cols-2 sm:grid-cols-5 gap-3 items-end">
+        <div>
+          <label for="taxII" class="block text-[11px] font-bold text-slate-700">Alíquota II (%)</label>
+          <input type="number" id="taxII" step="0.5" min="0" max="100" value="14"
+            class="w-full mt-1 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs sm:text-sm font-bold text-slate-900" />
+        </div>
+        <div>
+          <label for="taxIPI" class="block text-[11px] font-bold text-slate-700">Alíquota IPI (%)</label>
+          <input type="number" id="taxIPI" step="0.5" min="0" max="100" value="5"
+            class="w-full mt-1 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs sm:text-sm font-bold text-slate-900" />
+        </div>
+        <div>
+          <label for="taxPisCofins" class="block text-[11px] font-bold text-slate-700">PIS/COFINS Imp. (%)</label>
+          <input type="number" id="taxPisCofins" step="0.25" min="0" max="100" value="11.75"
+            class="w-full mt-1 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs sm:text-sm font-bold text-slate-900" />
+        </div>
+        <div>
+          <label for="taxICMS" class="block text-[11px] font-bold text-slate-700">ICMS Destino (%)</label>
+          <input type="number" id="taxICMS" step="1" min="0" max="100" value="18"
+            class="w-full mt-1 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs sm:text-sm font-bold text-slate-900" />
+        </div>
+        <div class="col-span-2 sm:col-span-1">
+          <label for="inputResalePriceBRL" class="block text-[11px] font-bold text-[#002C5F]">Valor Aplicação / Venda (R$/un.)</label>
+          <input type="number" id="inputResalePriceBRL" step="10" min="1" value="1450"
+            class="w-full mt-1 px-3 py-1.5 rounded-lg border-2 border-[#002C5F]/40 bg-white text-xs sm:text-sm font-extrabold text-[#002C5F]" />
+        </div>
+      </div>
+    </section>
+
+    <!-- MÓDULO 2: Comparador de Negociação entre Fornecedores -->
+    <section class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-[#002C5F]">Módulo 2 • Simulação de Landed Cost & Sourcing</span>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">2. Comparador Estratégico de Fornecedores (Cotação Internacional)</h2>
+        </div>
+        <span id="incotermFreightHint" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200">
+          Incoterm FOB: Frete e Seguro internacionais pagos pelo importador.
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- CARD FORNECEDOR A (Coreia do Sul - Busan) -->
+        <div id="cardSupplierA" class="bg-white rounded-2xl p-5 sm:p-6 border-2 border-emerald-500 card-shadow relative transition-all">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3.5">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#002C5F]"></span>
+                <input type="text" id="nameA" value="Fornecedor A • Hyundai Mobis (Busan, Coreia do Sul)"
+                  class="font-bold text-slate-900 text-sm sm:text-base bg-transparent border-b border-transparent hover:border-slate-300 focus:border-[#002C5F] focus:outline-none w-full" />
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">Hub Asiático • Alta escala produtiva, trânsito marítimo longo</p>
+            </div>
+            <span id="badgeWinnerA" class="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 shrink-0">
+              🏆 VENCEDOR
+            </span>
+          </div>
+
+          <!-- Inputs Fornecedor A -->
+          <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-600">Preço Unitário (USD)</label>
+              <input type="number" id="unitPriceA" step="1" min="0" value="145"
+                class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-900" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600">Quantidade (un.)</label>
+              <input type="number" id="qtyA" step="50" min="1" value="500"
+                class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-900" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600">Lead Time (dias)</label>
+              <input type="number" id="leadTimeA" step="1" min="1" value="42"
+                class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-900" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600">Frete Int. Lote (USD)</label>
+              <input type="number" id="freightA" step="100" min="0" value="4200"
+                class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-900" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600">Seguro Int. Lote (USD)</label>
+              <input type="number" id="insuranceA" step="50" min="0" value="480"
+                class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-900" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600">Desp. Porto/Siscomex (R$)</label>
+              <input type="number" id="portFeesA" step="500" min="0" value="14500"
+                class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-900" />
+            </div>
+          </div>
+
+          <!-- Acordo Tarifário A -->
+          <div class="mt-3 flex items-center justify-between bg-slate-50 px-3 py-2 rounded-xl border border-slate-200/80">
+            <label for="agreementA" class="text-xs font-semibold text-slate-700">Acordo Tarifário Preferencial:</label>
+            <select id="agreementA" class="text-xs font-bold text-[#002C5F] bg-white border border-slate-300 rounded-lg px-2.5 py-1">
+              <option value="none" selected>Sem Acordo (II Integral)</option>
+              <option value="mercosul">Acordo Automotivo / Mercosul (0% II)</option>
+            </select>
+          </div>
+
+          <!-- Detalhamento em Cascata do Landed Cost A -->
+          <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
+            <div class="flex justify-between text-slate-600">
+              <span>Valor Aduaneiro (CIF em BRL):</span>
+              <strong id="cifBrlA" class="text-slate-900">R$ 436.067,00</strong>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>Tributos Federais (II + IPI + PIS/COFINS):</span>
+              <strong id="fedTaxesA" class="text-slate-900">R$ 139.410,62</strong>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>ICMS (Cálculo por Dentro):</span>
+              <strong id="icmsA" class="text-slate-900">R$ 129.507,23</strong>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>Despesas Portuárias + Custo Capital Trânsito:</span>
+              <strong id="extraCostsA" class="text-slate-900">R$ 21.519,68</strong>
+            </div>
+            <div class="mt-3 pt-2.5 border-t-2 border-slate-200 flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-bold uppercase text-slate-500 block">Custo Total Desembarcado (Lote)</span>
+                <strong id="totalLandedA" class="text-lg font-extrabold text-slate-900">R$ 726.504,53</strong>
+              </div>
+              <div class="text-right">
+                <span class="text-[11px] font-bold uppercase text-slate-500 block">Custo Real Unitário</span>
+                <strong id="unitLandedA" class="text-lg font-extrabold text-emerald-700">R$ 1.453,01</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD FORNECEDOR B (Alternativo - México / Alemanha) -->
+        <div id="cardSupplierB" class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 card-shadow relative transition-all">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3.5">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>
+                <input type="text" id="nameB" value="Fornecedor B • Planta Monterrey (México - ACE 55)"
+                  class="font-bold text-slate-900 text-sm sm:text-base bg-transparent border-b border-transparent hover:border-slate-300 focus:border-[#002C5F] focus:outline-none w-full" />
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">Nearshoring Américas • Preço FOB maior, acordo automotivo e menor trânsito</p>
+            </div>
+            <span id="badgeWinnerB" class="hidden px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 shrink-0">
+              🏆 VENCEDOR
+            </span>
+          </div>
+
+          <!-- Inputs Fornecedor B -->
+          <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-600">Preço Unitário (USD)</label>
+              <input type="number" id="unitPriceB" step="1" min="0" value="162"
+                class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-900" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600">Quantidade (un.)</label>
+              <input type="number" id="qtyB" step="50" min="1" value="500"
+                class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-900" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600">Lead Time (dias)</label>
+              <input type="number" id="leadTimeB" step="1" min="1" value="16"
+                class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-900" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600">Frete Int. Lote (USD)</label>
+              <input type="number" id="freightB" step="100" min="0" value="2600"
+                class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-900" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600">Seguro Int. Lote (USD)</label>
+              <input type="number" id="insuranceB" step="50" min="0" value="350"
+                class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-900" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600">Desp. Porto/Siscomex (R$)</label>
+              <input type="number" id="portFeesB" step="500" min="0" value="11200"
+                class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-900" />
+            </div>
+          </div>
+
+          <!-- Acordo Tarifário B -->
+          <div class="mt-3 flex items-center justify-between bg-slate-50 px-3 py-2 rounded-xl border border-slate-200/80">
+            <label for="agreementB" class="text-xs font-semibold text-slate-700">Acordo Tarifário Preferencial:</label>
+            <select id="agreementB" class="text-xs font-bold text-[#002C5F] bg-white border border-slate-300 rounded-lg px-2.5 py-1">
+              <option value="none">Sem Acordo (II Integral)</option>
+              <option value="mercosul" selected>Acordo Automotivo / Mercosul (0% II)</option>
+            </select>
+          </div>
+
+          <!-- Detalhamento em Cascata do Landed Cost B -->
+          <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
+            <div class="flex justify-between text-slate-600">
+              <span>Valor Aduaneiro (CIF em BRL):</span>
+              <strong id="cifBrlB" class="text-slate-900">R$ 474.317,50</strong>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>Tributos Federais (II + IPI + PIS/COFINS):</span>
+              <strong id="fedTaxesB" class="text-slate-900">R$ 79.448,18</strong>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>ICMS (Cálculo por Dentro):</span>
+              <strong id="icmsB" class="text-slate-900">R$ 124.017,51</strong>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>Despesas Portuárias + Custo Capital Trânsito:</span>
+              <strong id="extraCostsB" class="text-slate-900">R$ 14.109,15</strong>
+            </div>
+            <div class="mt-3 pt-2.5 border-t-2 border-slate-200 flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-bold uppercase text-slate-500 block">Custo Total Desembarcado (Lote)</span>
+                <strong id="totalLandedB" class="text-lg font-extrabold text-slate-900">R$ 691.892,34</strong>
+              </div>
+              <div class="text-right">
+                <span class="text-[11px] font-bold uppercase text-slate-500 block">Custo Real Unitário</span>
+                <strong id="unitLandedB" class="text-lg font-extrabold text-slate-900">R$ 1.383,78</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Banner de Veredito de Negociação -->
+      <div class="bg-gradient-to-r from-[#001A3A] to-[#002C5F] text-white rounded-2xl p-5 shadow-lg flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <span class="text-xs font-bold uppercase tracking-wider text-cyan-300">Veredito Automático de Compras & Comex</span>
+          <h3 id="negotiationHeadline" class="text-base sm:text-lg font-extrabold">
+            Fornecedor B (México) apresenta o menor Custo Real Desembarcado (-R$ 69,23/un.)
+          </h3>
+          <p id="negotiationAdvice" class="text-xs sm:text-sm text-blue-100/90">
+            Alavanca de negociação: Para empatar a proposta, o Fornecedor A precisa conceder um desconto de <strong>6,4%</strong> no preço unitário FOB (reduzindo de US$ 145,00 para US$ 135,72).
+          </p>
+        </div>
+        <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3 shrink-0 text-right">
+          <span class="text-[11px] uppercase tracking-wider text-cyan-200 block">Economia Direta na Escolha</span>
+          <strong id="negotiationSavingBRL" class="text-xl sm:text-2xl font-extrabold text-emerald-300">R$ 34.612,19</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- MÓDULO 3: Balanço Contábil da Matéria-Prima (Ativo vs Passivo) + Gráfico -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Balanço Contábil Ativo vs Passivo (7 cols) -->
+      <div class="lg:col-span-7 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 card-shadow flex flex-col justify-between space-y-5">
+        <div>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3.5 gap-2">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-[#002C5F]">Módulo 3 • Viabilidade Financeira (Lucro Real)</span>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900">3. Balanço da Matéria-Prima (Ativo vs. Passivo)</h2>
+            </div>
+            <span id="balanceSupplierTag" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-blue-50 text-[#002C5F]">
+              Base: Fornecedor Vencedor
+            </span>
+          </div>
+
+          <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Coluna ATIVO / RETORNO -->
+            <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4 space-y-2.5">
+              <div class="flex items-center justify-between border-b border-emerald-200/80 pb-2">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-900">ATIVO / RETORNO GERADO</span>
+                <span class="text-xs font-bold text-emerald-700">(+) Entradas</span>
+              </div>
+              <div class="space-y-1.5 text-xs">
+                <div class="flex justify-between text-slate-700">
+                  <span>Receita Aplicação / Revenda:</span>
+                  <strong id="assetRevenueBRL">R$ 725.000,00</strong>
+                </div>
+                <div class="flex justify-between text-slate-700">
+                  <span>Crédito Tributário IPI:</span>
+                  <strong id="assetCreditIPI">R$ 23.715,88</strong>
+                </div>
+                <div class="flex justify-between text-slate-700">
+                  <span>Crédito PIS/COFINS Imp.:</span>
+                  <strong id="assetCreditPisCofins">R$ 55.732,31</strong>
+                </div>
+                <div class="flex justify-between text-slate-700">
+                  <span>Crédito ICMS Recuperável:</span>
+                  <strong id="assetCreditICMS">R$ 124.017,51</strong>
+                </div>
+              </div>
+              <div class="pt-2 border-t border-emerald-300 flex justify-between items-center">
+                <span class="text-xs font-bold text-emerald-950">TOTAL ATIVO:</span>
+                <strong id="totalAssetBRL" class="text-base font-extrabold text-emerald-800">R$ 928.465,70</strong>
+              </div>
+            </div>
+
+            <!-- Coluna PASSIVO / DESEMBOLSO -->
+            <div class="bg-rose-50/70 border border-rose-200 rounded-2xl p-4 space-y-2.5">
+              <div class="flex items-center justify-between border-b border-rose-200/80 pb-2">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-rose-900">PASSIVO / DESEMBOLSO</span>
+                <span class="text-xs font-bold text-rose-700">(-) Saídas</span>
+              </div>
+              <div class="space-y-1.5 text-xs">
+                <div class="flex justify-between text-slate-700">
+                  <span>Valor Aduaneiro (CIF):</span>
+                  <strong id="liabilityCifBRL">R$ 474.317,50</strong>
+                </div>
+                <div class="flex justify-between text-slate-700">
+                  <span>Carga Tributária na Doca:</span>
+                  <strong id="liabilityTaxesBRL">R$ 203.465,69</strong>
+                </div>
+                <div class="flex justify-between text-slate-700">
+                  <span>Despesas Aduaneiras/Porto:</span>
+                  <strong id="liabilityFeesBRL">R$ 11.200,00</strong>
+                </div>
+                <div class="flex justify-between text-slate-700">
+                  <span>Custo Capital em Trânsito:</span>
+                  <strong id="liabilityCapitalBRL">R$ 2.909,15</strong>
+                </div>
+              </div>
+              <div class="pt-2 border-t border-rose-300 flex justify-between items-center">
+                <span class="text-xs font-bold text-rose-950">TOTAL PASSIVO:</span>
+                <strong id="totalLiabilityBRL" class="text-base font-extrabold text-rose-800">R$ 691.892,34</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resultado Líquido & Veredito de Embarque -->
+        <div id="netBalanceBanner" class="rounded-2xl p-4 bg-emerald-600 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider opacity-90">Saldo Líquido da Operação (Ativo - Passivo)</span>
+            <div class="flex items-baseline gap-3 mt-0.5">
+              <strong id="netProfitBRL" class="text-2xl font-extrabold">+ R$ 236.573,36</strong>
+              <span id="netMarginPercent" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white/20">Margem Líquida: 32,6%</span>
+            </div>
+          </div>
+          <div id="shipmentVerdictBadge" class="px-4 py-2 rounded-xl bg-white text-emerald-900 font-extrabold text-xs uppercase tracking-wider text-center shadow-sm">
+            ✔ OPERAÇÃO VIÁVEL • APROVAR EMBARQUE
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráfico Comparativo de Composição de Custos (5 cols) -->
+      <div class="lg:col-span-5 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 card-shadow flex flex-col">
+        <div class="mb-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-[#002C5F]">Decomposição de Custos</span>
+          <h2 class="text-base font-bold text-slate-900">4. Estrutura do Landed Cost (Fornecedor A vs. B)</h2>
+          <p class="text-xs text-slate-500">Comparativo em R$ por camada de custo desembarcado</p>
+        </div>
+        <div class="relative flex-1 min-h-[280px] w-full">
+          <canvas id="landedCostChart"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="bg-white border-t border-slate-200 mt-10 py-5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+      <p><strong>GlobalTrade OS</strong> — Simulador Aduaneiro, Compliance & Análise de Landed Cost (Case Referência: Hyundai Autopeças).</p>
+      <p>Modelagem baseada nas regras da DUIMP / Siscomex, Incoterms® 2020 e Tributação Brasileira na Importação.</p>
+    </div>
+  </footer>
+
+  <!-- Script Completo -->
+  <script>
+    // =========================================================================
+    // 1. BASE DE CONHECIMENTO ADUANEIRO (PRESETS DO NICHO AUTOMOTIVO HYUNDAI)
+    // =========================================================================
+    const PRODUCT_PRESETS = {
+      ecu: {
+        name: 'Módulo Eletrônico ECU & Telemetria',
+        ncm: '8537.10.90',
+        regime: 'extarifario',
+        agencies: [
+          { name: 'INMETRO (Compulsório)', color: 'bg-blue-100 text-blue-900 border-blue-200' },
+          { name: 'ANATEL (Homologação RF)', color: 'bg-purple-100 text-purple-900 border-purple-200' },
+          { name: 'Receita Federal (DUIMP)', color: 'bg-slate-200 text-slate-800 border-slate-300' }
+        ],
+        liRequirement: 'LI Pré-Embarque (ANATEL/INMETRO)',
+        channelRisk: 'Canal Amarelo (Risco Médio)',
+        notes: 'Módulos com conectividade embarcada (telemetria/infotainment) exigem certificação prévia na ANATEL e registro de conformidade no INMETRO antes do embarque em Busan.',
+        ii: 14,
+        ipi: 5,
+        pisCofins: 11.75,
+        icms: 18,
+        resaleBRL: 1450,
+        supA: { unitPrice: 145, qty: 500, leadTime: 42, freight: 4200, insurance: 480, portFees: 14500, agreement: 'none' },
+        supB: { unitPrice: 162, qty: 500, leadTime: 16, freight: 2600, insurance: 350, portFees: 11200, agreement: 'mercosul' }
+      },
+      transmission: {
+        name: 'Conjunto de Transmissão Automática CKD',
+        ncm: '8708.40.80',
+        regime: 'drawback',
+        agencies: [
+          { name: 'INMETRO (Segurança Veicular)', color: 'bg-blue-100 text-blue-900 border-blue-200' },
+          { name: 'SECEX (Ato Concessório Drawback)', color: 'bg-emerald-100 text-emerald-900 border-emerald-200' },
+          { name: 'Receita Federal (DUIMP)', color: 'bg-slate-200 text-slate-800 border-slate-300' }
+        ],
+        liRequirement: 'Dispensado de LI (Drawback Vinculado)',
+        channelRisk: 'Canal Verde / Amarelo (Baixo)',
+        notes: 'Subconjunto crítico para linha de montagem (CKD). Quando vinculado a compromisso de exportação de veículos na América Latina via Drawback Suspensão, suspende II, IPI e PIS/COFINS.',
+        ii: 16,
+        ipi: 8,
+        pisCofins: 11.75,
+        icms: 18,
+        resaleBRL: 6800,
+        supA: { unitPrice: 780, qty: 200, leadTime: 45, freight: 9800, insurance: 1100, portFees: 22000, agreement: 'none' },
+        supB: { unitPrice: 840, qty: 200, leadTime: 18, freight: 5400, insurance: 750, portFees: 16500, agreement: 'mercosul' }
+      },
+      battery: {
+        name: 'Pack de Baterias Lítio-Íon Híbrido',
+        ncm: '8507.60.00',
+        regime: 'extarifario',
+        agencies: [
+          { name: 'INMETRO (Ensaio Eletroquímico)', color: 'bg-blue-100 text-blue-900 border-blue-200' },
+          { name: 'IBAMA (Controle Resíduos/Perigosos)', color: 'bg-emerald-100 text-emerald-900 border-emerald-200' },
+          { name: 'ANVISA (Insumo Químico/Segurança)', color: 'bg-amber-100 text-amber-900 border-amber-200' }
+        ],
+        liRequirement: 'LI Pré-Embarque + Carga IMO Classe 9',
+        channelRisk: 'Canal Vermelho (Alto Risco Demurrage)',
+        notes: 'Carga perigosa (IMDG Classe 9). Exige anuência ambiental do IBAMA (logística reversa futura), laudo químico e certificação de segurança térmica.',
+        ii: 18,
+        ipi: 0,
+        pisCofins: 11.75,
+        icms: 18,
+        resaleBRL: 18500,
+        supA: { unitPrice: 2100, qty: 100, leadTime: 48, freight: 12500, insurance: 2400, portFees: 29000, agreement: 'none' },
+        supB: { unitPrice: 2350, qty: 100, leadTime: 22, freight: 8900, insurance: 1900, portFees: 24500, agreement: 'none' }
+      },
+      lighting: {
+        name: 'Sistema de Iluminação Full LED',
+        ncm: '8512.20.11',
+        regime: 'common',
+        agencies: [
+          { name: 'INMETRO (Portaria Faróis Automotivos)', color: 'bg-blue-100 text-blue-900 border-blue-200' },
+          { name: 'Receita Federal (DUIMP)', color: 'bg-slate-200 text-slate-800 border-slate-300' }
+        ],
+        liRequirement: 'LI Pós-Embarque / Registro INMETRO',
+        channelRisk: 'Canal Verde (Baixo Risco)',
+        notes: 'Conjunto óptico sujeito à avaliação de conformidade compulsória do INMETRO (foco e intensidade luminosa). Importação comum sem benefício de Ex-Tarifário.',
+        ii: 16,
+        ipi: 5,
+        pisCofins: 11.75,
+        icms: 18,
+        resaleBRL: 2200,
+        supA: { unitPrice: 195, qty: 400, leadTime: 40, freight: 3900, insurance: 420, portFees: 12800, agreement: 'none' },
+        supB: { unitPrice: 218, qty: 400, leadTime: 15, freight: 2400, insurance: 310, portFees: 9800, agreement: 'mercosul' }
+      }
+    };
+
+    const INCOTERMS_DATA = {
+      EXW: {
+        exporterShare: 10,
+        importerShare: 90,
+        desc: 'Ex Works: O fornecedor entrega na própria fábrica na origem. O importador assume coleta interna, desembaraço exportação, frete e seguro.',
+        hint: 'Incoterm EXW: Frete internacional e seguro são pagos integralmente pelo importador.',
+        importerPaysFreight: true
+      },
+      FCA: {
+        exporterShare: 25,
+        importerShare: 75,
+        desc: 'Free Carrier: O fornecedor entrega a carga desembaraçada ao transportador indicado no local combinado na origem.',
+        hint: 'Incoterm FCA: Frete internacional e seguro são pagos pelo importador.',
+        importerPaysFreight: true
+      },
+      FOB: {
+        exporterShare: 35,
+        importerShare: 65,
+        desc: 'Free On Board: O fornecedor coloca a carga a bordo do navio no porto de origem (ex: Busan). Risco transfere na amurada do navio.',
+        hint: 'Incoterm FOB: Frete internacional e seguro são pagos pelo importador.',
+        importerPaysFreight: true
+      },
+      CIF: {
+        exporterShare: 65,
+        importerShare: 35,
+        desc: 'Cost, Insurance and Freight: O fornecedor já embute no preço o frete marítimo e o seguro até o porto de destino no Brasil.',
+        hint: 'Incoterm CIF: Frete e seguro já estão inclusos no preço do fornecedor (não somados à parte).',
+        importerPaysFreight: false
+      },
+      DDP: {
+        exporterShare: 95,
+        importerShare: 5,
+        desc: 'Delivered Duty Paid: O fornecedor entrega na porta da fábrica no Brasil com frete, seguro e desembaraço pagos.',
+        hint: 'Incoterm DDP: Frete e seguro já inclusos na proposta do fornecedor.',
+        importerPaysFreight: false
+      }
+    };
+
+    let currentIncoterm = 'FOB';
+    let landedCostChart = null;
+    let lastCalculation = null;
+
+    // =========================================================================
+    // 2. UTILITÁRIOS DE FORMATAÇÃO
+    // =========================================================================
+    function formatBRL(val) {
+      return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function formatUSD(val) {
+      return val.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    }
+
+    function formatPct(val, dec = 1) {
+      return val.toLocaleString('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + '%';
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.remove('translate-y-4', 'opacity-0'), 10);
+      setTimeout(() => {
+        toast.classList.add('translate-y-4', 'opacity-0');
+        setTimeout(() => toast.classList.add('hidden'), 300);
+      }, 3200);
+    }
+
+    // =========================================================================
+    // 3. APLICAÇÃO DE PRESET NCM, INCOTERM E REGIME ADUANEIRO
+    // =========================================================================
+    function loadProductPreset(presetKey) {
+      const p = PRODUCT_PRESETS[presetKey];
+      if (!p) return;
+
+      // Badges e textos regulatórios
+      document.getElementById('ncmDisplayBadge').textContent = `NCM ${p.ncm}`;
+      document.getElementById('liRequirement').textContent = p.liRequirement;
+      document.getElementById('customsChannelRisk').textContent = p.channelRisk;
+      document.getElementById('regulatoryNotes').textContent = p.notes;
+
+      const agenciesEl = document.getElementById('agenciesContainer');
+      agenciesEl.innerHTML = p.agencies.map(ag => `
+        <span class="text-xs font-bold px-2.5 py-1 rounded-lg border ${ag.color}">
+          ✓ ${ag.name}
+        </span>
+      `).join('');
+
+      // Regime e Alíquotas
+      document.getElementById('customsRegimeSelect').value = p.regime;
+      document.getElementById('taxII').value = p.ii;
+      document.getElementById('taxIPI').value = p.ipi;
+      document.getElementById('taxPisCofins').value = p.pisCofins;
+      document.getElementById('taxICMS').value = p.icms;
+      document.getElementById('inputResalePriceBRL').value = p.resaleBRL;
+
+      // Fornecedor A
+      document.getElementById('unitPriceA').value = p.supA.unitPrice;
+      document.getElementById('qtyA').value = p.supA.qty;
+      document.getElementById('leadTimeA').value = p.supA.leadTime;
+      document.getElementById('freightA').value = p.supA.freight;
+      document.getElementById('insuranceA').value = p.supA.insurance;
+      document.getElementById('portFeesA').value = p.supA.portFees;
+      document.getElementById('agreementA').value = p.supA.agreement;
+
+      // Fornecedor B
+      document.getElementById('unitPriceB').value = p.supB.unitPrice;
+      document.getElementById('qtyB').value = p.supB.qty;
+      document.getElementById('leadTimeB').value = p.supB.leadTime;
+      document.getElementById('freightB').value = p.supB.freight;
+      document.getElementById('insuranceB').value = p.supB.insurance;
+      document.getElementById('portFeesB').value = p.supB.portFees;
+      document.getElementById('agreementB').value = p.supB.agreement;
+
+      applyRegimeRules(false);
+      calculateAll();
+    }
+
+    function setIncoterm(code) {
+      currentIncoterm = code;
+      const info = INCOTERMS_DATA[code];
+
+      document.getElementById('incotermCodeBadge').textContent = code;
+      document.getElementById('incotermDescription').textContent = info.desc;
+      document.getElementById('incotermFreightHint').textContent = info.hint;
+      document.getElementById('exporterShareText').textContent = `Exportador: ${info.exporterShare}%`;
+      document.getElementById('importerShareText').textContent = `Importador: ${info.importerShare}%`;
+      document.getElementById('exporterBar').style.width = `${info.exporterShare}%`;
+      document.getElementById('importerBar').style.width = `${info.importerShare}%`;
+
+      document.querySelectorAll('.incoterm-btn').forEach(btn => {
+        if (btn.dataset.incoterm === code) {
+          btn.className = 'incoterm-btn py-1.5 rounded-lg text-xs font-extrabold border border-[#002C5F] bg-[#002C5F] text-white transition cursor-pointer';
+        } else {
+          btn.className = 'incoterm-btn py-1.5 rounded-lg text-xs font-bold border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 transition cursor-pointer';
+        }
+      });
+
+      calculateAll();
+    }
+
+    function applyRegimeRules(recalc = true) {
+      const regime = document.getElementById('customsRegimeSelect').value;
+      const preset = PRODUCT_PRESETS[document.getElementById('productPresetSelect').value];
+      const noteEl = document.getElementById('regimeEffectNote');
+
+      if (regime === 'drawback') {
+        document.getElementById('taxII').value = 0;
+        document.getElementById('taxIPI').value = 0;
+        document.getElementById('taxPisCofins').value = 0;
+        noteEl.textContent = 'Drawback Suspensão: Zera II, IPI e PIS/COFINS para insumos vinculados à exportação.';
+      } else if (regime === 'extarifario') {
+        document.getElementById('taxII').value = 2;
+        document.getElementById('taxIPI').value = preset.ipi;
+        document.getElementById('taxPisCofins').value = preset.pisCofins;
+        noteEl.textContent = 'Ex-Tarifário: Reduz o Imposto de Importação (II) para 2% por ausência de similar nacional.';
+      } else {
+        document.getElementById('taxII').value = preset.ii;
+        document.getElementById('taxIPI').value = preset.ipi;
+        document.getElementById('taxPisCofins').value = preset.pisCofins;
+        noteEl.textContent = 'Importação Comum: Tributação integral aplicada sobre o Valor Aduaneiro (CIF).';
+      }
+
+      if (recalc) calculateAll();
+    }
+
+    function resetToCurrentPreset() {
+      const currentKey = document.getElementById('productPresetSelect').value;
+      loadProductPreset(currentKey);
+      showToast('Parâmetros originais do NCM restaurados.');
+    }
+
+    // =========================================================================
+    // 4. MOTOR DE CÁLCULO TRIBUTÁRIO EM CASCATA (LANDED COST) & BALANÇO
+    // =========================================================================
+    function computeSupplierLandedCost(sup, globals) {
+      const { exchangeRate, capitalMonthlyPct, baseII, baseIPI, basePisCofins, baseICMS, importerPaysFreight } = globals;
+
+      const goodsUSD = sup.unitPrice * sup.qty;
+      const freightUSD = importerPaysFreight ? sup.freight : 0;
+      const insuranceUSD = importerPaysFreight ? sup.insurance : 0;
+
+      // Valor Aduaneiro (CIF em BRL)
+      const cifUSD = goodsUSD + freightUSD + insuranceUSD;
+      const cifBRL = cifUSD * exchangeRate;
+      const goodsBRL = goodsUSD * exchangeRate;
+      const freightInsBRL = (freightUSD + insuranceUSD) * exchangeRate;
+
+      // Imposto de Importação (considera acordo tarifário)
+      const effectiveII = sup.agreement === 'mercosul' ? 0 : baseII;
+      const valII = cifBRL * (effectiveII / 100);
+
+      // IPI = (CIF + II) * alíquota IPI
+      const valIPI = (cifBRL + valII) * (baseIPI / 100);
+
+      // PIS/COFINS-Importação = CIF * alíquota PIS/COFINS
+      const valPisCofins = cifBRL * (basePisCofins / 100);
+
+      // Despesas aduaneiras/portuárias (Siscomex, AFRMM, armazenagem)
+      const portFeesBRL = sup.portFees;
+
+      // ICMS por dentro = ((CIF + II + IPI + PIS/COFINS + Despesas) / (1 - alíquota ICMS)) * alíquota ICMS
+      const icmsRate = Math.min(0.95, baseICMS / 100);
+      const baseAntesICMS = cifBRL + valII + valIPI + valPisCofins + portFeesBRL;
+      const valICMS = icmsRate > 0 ? (baseAntesICMS / (1 - icmsRate)) * icmsRate : 0;
+
+      // Custo Financeiro de Estoque em Trânsito = CIF * (Custo Capital Mensal * (Lead Time / 30))
+      const capitalCostBRL = cifBRL * ((capitalMonthlyPct / 100) * (sup.leadTime / 30));
+
+      const totalTaxesBRL = valII + valIPI + valPisCofins + valICMS;
+      const totalLandedBRL = cifBRL + totalTaxesBRL + portFeesBRL + capitalCostBRL;
+      const unitLandedBRL = sup.qty > 0 ? totalLandedBRL / sup.qty : 0;
+
+      // Créditos Tributários Recuperáveis (Lucro Real: IPI + PIS/COFINS + ICMS; II não gera crédito)
+      const taxCreditsBRL = valIPI + valPisCofins + valICMS;
+
+      return {
+        ...sup,
+        goodsUSD,
+        cifUSD,
+        cifBRL,
+        goodsBRL,
+        freightInsBRL,
+        effectiveII,
+        valII,
+        valIPI,
+        valPisCofins,
+        valICMS,
+        totalTaxesBRL,
+        portFeesBRL,
+        capitalCostBRL,
+        totalLandedBRL,
+        unitLandedBRL,
+        taxCreditsBRL
+      };
+    }
+
+    function calculateAll() {
+      const globals = {
+        exchangeRate: Math.max(0.1, parseFloat(document.getElementById('inputExchangeRate').value) || 5.65),
+        capitalMonthlyPct: Math.max(0, parseFloat(document.getElementById('inputCapitalCost').value) || 0),
+        baseII: Math.max(0, parseFloat(document.getElementById('taxII').value) || 0),
+        baseIPI: Math.max(0, parseFloat(document.getElementById('taxIPI').value) || 0),
+        basePisCofins: Math.max(0, parseFloat(document.getElementById('taxPisCofins').value) || 0),
+        baseICMS: Math.max(0, parseFloat(document.getElementById('taxICMS').value) || 0),
+        resalePriceBRL: Math.max(0, parseFloat(document.getElementById('inputResalePriceBRL').value) || 0),
+        importerPaysFreight: INCOTERMS_DATA[currentIncoterm].importerPaysFreight
+      };
+
+      const supAInput = {
+        name: document.getElementById('nameA').value || 'Fornecedor A',
+        unitPrice: Math.max(0, parseFloat(document.getElementById('unitPriceA').value) || 0),
+        qty: Math.max(1, parseFloat(document.getElementById('qtyA').value) || 1),
+        leadTime: Math.max(0, parseFloat(document.getElementById('leadTimeA').value) || 0),
+        freight: Math.max(0, parseFloat(document.getElementById('freightA').value) || 0),
+        insurance: Math.max(0, parseFloat(document.getElementById('insuranceA').value) || 0),
+        portFees: Math.max(0, parseFloat(document.getElementById('portFeesA').value) || 0),
+        agreement: document.getElementById('agreementA').value
+      };
+
+      const supBInput = {
+        name: document.getElementById('nameB').value || 'Fornecedor B',
+        unitPrice: Math.max(0, parseFloat(document.getElementById('unitPriceB').value) || 0),
+        qty: Math.max(1, parseFloat(document.getElementById('qtyB').value) || 1),
+        leadTime: Math.max(0, parseFloat(document.getElementById('leadTimeB').value) || 0),
+        freight: Math.max(0, parseFloat(document.getElementById('freightB').value) || 0),
+        insurance: Math.max(0, parseFloat(document.getElementById('insuranceB').value) || 0),
+        portFees: Math.max(0, parseFloat(document.getElementById('portFeesB').value) || 0),
+        agreement: document.getElementById('agreementB').value
+      };
+
+      const resA = computeSupplierLandedCost(supAInput, globals);
+      const resB = computeSupplierLandedCost(supBInput, globals);
+
+      // Atualiza Cards A e B
+      document.getElementById('cifBrlA').textContent = formatBRL(resA.cifBRL);
+      document.getElementById('fedTaxesA').textContent = formatBRL(resA.valII + resA.valIPI + resA.valPisCofins);
+      document.getElementById('icmsA').textContent = formatBRL(resA.valICMS);
+      document.getElementById('extraCostsA').textContent = formatBRL(resA.portFeesBRL + resA.capitalCostBRL);
+      document.getElementById('totalLandedA').textContent = formatBRL(resA.totalLandedBRL);
+      document.getElementById('unitLandedA').textContent = formatBRL(resA.unitLandedBRL);
+
+      document.getElementById('cifBrlB').textContent = formatBRL(resB.cifBRL);
+      document.getElementById('fedTaxesB').textContent = formatBRL(resB.valII + resB.valIPI + resB.valPisCofins);
+      document.getElementById('icmsB').textContent = formatBRL(resB.valICMS);
+      document.getElementById('extraCostsB').textContent = formatBRL(resB.portFeesBRL + resB.capitalCostBRL);
+      document.getElementById('totalLandedB').textContent = formatBRL(resB.totalLandedBRL);
+      document.getElementById('unitLandedB').textContent = formatBRL(resB.unitLandedBRL);
+
+      // Define Vencedor pelo menor Custo Real Unitário
+      const aWins = resA.unitLandedBRL <= resB.unitLandedBRL;
+      const winner = aWins ? resA : resB;
+      const loser = aWins ? resB : resA;
+
+      const cardA = document.getElementById('cardSupplierA');
+      const cardB = document.getElementById('cardSupplierB');
+      const badgeA = document.getElementById('badgeWinnerA');
+      const badgeB = document.getElementById('badgeWinnerB');
+
+      if (aWins) {
+        cardA.className = 'bg-white rounded-2xl p-5 sm:p-6 border-2 border-emerald-500 card-shadow relative transition-all';
+        cardB.className = 'bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 card-shadow relative transition-all';
+        badgeA.classList.remove('hidden');
+        badgeB.classList.add('hidden');
+        document.getElementById('unitLandedA').className = 'text-lg font-extrabold text-emerald-700';
+        document.getElementById('unitLandedB').className = 'text-lg font-extrabold text-slate-900';
+      } else {
+        cardB.className = 'bg-white rounded-2xl p-5 sm:p-6 border-2 border-emerald-500 card-shadow relative transition-all';
+        cardA.className = 'bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 card-shadow relative transition-all';
+        badgeB.classList.remove('hidden');
+        badgeA.classList.add('hidden');
+        document.getElementById('unitLandedB').className = 'text-lg font-extrabold text-emerald-700';
+        document.getElementById('unitLandedA').className = 'text-lg font-extrabold text-slate-900';
+      }
+
+      // Cálculo de Desconto de Empate (Target Price para o perdedor empatar no custo unitário)
+      const unitDiffBRL = loser.unitLandedBRL - winner.unitLandedBRL;
+      const totalBatchSavingBRL = unitDiffBRL * winner.qty;
+
+      // Calcula multiplicador efetivo de impostos/capital sobre o CIF do perdedor para achar redução exata no preço USD
+      const loserCifMultiplier = loser.cifBRL > 0 ? (loser.totalLandedBRL - loser.portFeesBRL) / loser.cifBRL : 1;
+      const requiredUsdReductionPerUnit = loserCifMultiplier > 0
+        ? (unitDiffBRL / globals.exchangeRate) / loserCifMultiplier
+        : 0;
+      const targetUnitPriceUSD = Math.max(0, loser.unitPrice - requiredUsdReductionPerUnit);
+      const requiredDiscountPct = loser.unitPrice > 0 ? (requiredUsdReductionPerUnit / loser.unitPrice) * 100 : 0;
+
+      document.getElementById('negotiationHeadline').textContent =
+        `${winner.name.split('•')[0].trim()} vence no Custo Real Desembarcado (-${formatBRL(unitDiffBRL)}/un.)`;
+
+      document.getElementById('negotiationAdvice').innerHTML =
+        `Alavanca de negociação: Para empatar a operação, o <strong>${loser.name.split('•')[0].trim()}</strong> precisa conceder um desconto de <strong>${formatPct(requiredDiscountPct, 1)}</strong> no preço unitário (baixando de ${formatUSD(loser.unitPrice)} para ${formatUSD(targetUnitPriceUSD)}).`;
+
+      document.getElementById('negotiationSavingBRL').textContent = formatBRL(totalBatchSavingBRL);
+
+      // =========================================================================
+      // 5. BALANÇO DA MATÉRIA-PRIMA (ATIVO VS PASSIVO DO FORNECEDOR VENCEDOR)
+      // =========================================================================
+      const revenueBRL = globals.resalePriceBRL * winner.qty;
+      const totalAssetBRL = revenueBRL + winner.taxCreditsBRL;
+      const totalLiabilityBRL = winner.totalLandedBRL;
+      const netProfitBRL = totalAssetBRL - totalLiabilityBRL;
+      const netMarginPct = totalAssetBRL > 0 ? (netProfitBRL / totalAssetBRL) * 100 : 0;
+
+      document.getElementById('balanceSupplierTag').textContent = `Base: ${winner.name.split('•')[0].trim()} (${winner.qty} un.)`;
+      document.getElementById('assetRevenueBRL').textContent = formatBRL(revenueBRL);
+      document.getElementById('assetCreditIPI').textContent = formatBRL(winner.valIPI);
+      document.getElementById('assetCreditPisCofins').textContent = formatBRL(winner.valPisCofins);
+      document.getElementById('assetCreditICMS').textContent = formatBRL(winner.valICMS);
+      document.getElementById('totalAssetBRL').textContent = formatBRL(totalAssetBRL);
+
+      document.getElementById('liabilityCifBRL').textContent = formatBRL(winner.cifBRL);
+      document.getElementById('liabilityTaxesBRL').textContent = formatBRL(winner.totalTaxesBRL);
+      document.getElementById('liabilityFeesBRL').textContent = formatBRL(winner.portFeesBRL);
+      document.getElementById('liabilityCapitalBRL').textContent = formatBRL(winner.capitalCostBRL);
+      document.getElementById('totalLiabilityBRL').textContent = formatBRL(totalLiabilityBRL);
+
+      const bannerEl = document.getElementById('netBalanceBanner');
+      const verdictEl = document.getElementById('shipmentVerdictBadge');
+      const profitEl = document.getElementById('netProfitBRL');
+
+      document.getElementById('netMarginPercent').textContent = `Margem Líquida: ${formatPct(netMarginPct, 1)}`;
+
+      if (netProfitBRL >= 0) {
+        bannerEl.className = 'rounded-2xl p-4 bg-emerald-600 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3';
+        profitEl.textContent = `+ ${formatBRL(netProfitBRL)}`;
+        verdictEl.className = 'px-4 py-2 rounded-xl bg-white text-emerald-900 font-extrabold text-xs uppercase tracking-wider text-center shadow-sm';
+        verdictEl.textContent = '✔ OPERAÇÃO VIÁVEL • APROVAR EMBARQUE';
+      } else {
+        bannerEl.className = 'rounded-2xl p-4 bg-rose-600 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3';
+        profitEl.textContent = formatBRL(netProfitBRL);
+        verdictEl.className = 'px-4 py-2 rounded-xl bg-white text-rose-900 font-extrabold text-xs uppercase tracking-wider text-center shadow-sm';
+        verdictEl.textContent = '✖ RISCO DE PREJUÍZO • RENEGOCIAR';
+      }
+
+      lastCalculation = { globals, resA, resB, winner, loser, totalAssetBRL, totalLiabilityBRL, netProfitBRL, netMarginPct, requiredDiscountPct, targetUnitPriceUSD };
+      updateLandedCostChart(resA, resB);
+    }
+
+    // =========================================================================
+    // 6. GRÁFICO DE COMPOSIÇÃO DE CUSTOS (CHART.JS)
+    // =========================================================================
+    function updateLandedCostChart(resA, resB) {
+      const ctx = document.getElementById('landedCostChart').getContext('2d');
+      const labels = [resA.name.split('•')[0].trim(), resB.name.split('•')[0].trim()];
+
+      const dataGoods = [Number(resA.goodsBRL.toFixed(2)), Number(resB.goodsBRL.toFixed(2))];
+      const dataFreightIns = [Number(resA.freightInsBRL.toFixed(2)), Number(resB.freightInsBRL.toFixed(2))];
+      const dataTaxes = [Number(resA.totalTaxesBRL.toFixed(2)), Number(resB.totalTaxesBRL.toFixed(2))];
+      const dataExtra = [
+        Number((resA.portFeesBRL + resA.capitalCostBRL).toFixed(2)),
+        Number((resB.portFeesBRL + resB.capitalCostBRL).toFixed(2))
+      ];
+
+      if (landedCostChart) {
+        landedCostChart.data.labels = labels;
+        landedCostChart.data.datasets[0].data = dataGoods;
+        landedCostChart.data.datasets[1].data = dataFreightIns;
+        landedCostChart.data.datasets[2].data = dataTaxes;
+        landedCostChart.data.datasets[3].data = dataExtra;
+        landedCostChart.update();
+      } else {
+        landedCostChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              { label: 'Mercadoria (FOB/EXW)', data: dataGoods, backgroundColor: '#002C5F', borderRadius: 4 },
+              { label: 'Frete + Seguro Int.', data: dataFreightIns, backgroundColor: '#00AAD2', borderRadius: 4 },
+              { label: 'Impostos (II/IPI/PIS/COFINS/ICMS)', data: dataTaxes, backgroundColor: '#F59E0B', borderRadius: 4 },
+              { label: 'Porto + Capital Trânsito', data: dataExtra, backgroundColor: '#64748B', borderRadius: 4 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { font: { family: 'Inter', size: 11, weight: '600' }, usePointStyle: true }
+              },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => `${ctx.dataset.label}: ${formatBRL(ctx.parsed.y)}`
+                }
+              }
+            },
+            scales: {
+              x: { stacked: true, grid: { display: false }, ticks: { font: { family: 'Inter', size: 12, weight: '700' } } },
+              y: {
+                stacked: true,
+                grid: { color: '#F1F5F9' },
+                ticks: {
+                  font: { family: 'Inter', size: 11 },
+                  callback: (v) => 'R$ ' + (v / 1000).toFixed(0) + 'k'
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // =========================================================================
+    // 7. EXPORTAÇÃO DE PARECER COMEX EM CSV
+    // =========================================================================
+    function exportComexCSV() {
+      if (!lastCalculation) return;
+      const { globals, resA, resB, winner, totalAssetBRL, totalLiabilityBRL, netProfitBRL, netMarginPct, requiredDiscountPct, targetUnitPriceUSD } = lastCalculation;
+      const preset = PRODUCT_PRESETS[document.getElementById('productPresetSelect').value];
+      const regimeLabel = document.getElementById('customsRegimeSelect').selectedOptions[0].text;
+
+      const lines = [
+        'PARECER TECNICO DE COMERCIO EXTERIOR E VIABILIDADE - GLOBALTRADE OS (CASE HYUNDAI)',
+        `Data de Emissao;${new Date().toLocaleDateString('pt-BR')}`,
+        `Componente / Produto;${preset.name}`,
+        `NCM;${preset.ncm}`,
+        `Incoterm 2020;${currentIncoterm}`,
+        `Regime Aduaneiro;${regimeLabel}`,
+        `Taxa de Cambio (R$/USD);${globals.exchangeRate.toFixed(2).replace('.', ',')}`,
+        '',
+        '1. COMPARATIVO DE LANDED COST POR FORNECEDOR',
+        `Indicador;${resA.name};${resB.name}`,
+        `Preco Unitario Origem (USD);${resA.unitPrice.toFixed(2).replace('.', ',')};${resB.unitPrice.toFixed(2).replace('.', ',')}`,
+        `Quantidade (un.);${resA.qty};${resB.qty}`,
+        `Lead Time Transito (dias);${resA.leadTime};${resB.leadTime}`,
+        `Valor Aduaneiro CIF (R$);${resA.cifBRL.toFixed(2).replace('.', ',')};${resB.cifBRL.toFixed(2).replace('.', ',')}`,
+        `Imposto de Importacao II (R$);${resA.valII.toFixed(2).replace('.', ',')};${resB.valII.toFixed(2).replace('.', ',')}`,
+        `IPI (R$);${resA.valIPI.toFixed(2).replace('.', ',')};${resB.valIPI.toFixed(2).replace('.', ',')}`,
+        `PIS/COFINS-Importacao (R$);${resA.valPisCofins.toFixed(2).replace('.', ',')};${resB.valPisCofins.toFixed(2).replace('.', ',')}`,
+        `ICMS por Dentro (R$);${resA.valICMS.toFixed(2).replace('.', ',')};${resB.valICMS.toFixed(2).replace('.', ',')}`,
+        `Despesas Porto + Capital Transito (R$);${(resA.portFeesBRL + resA.capitalCostBRL).toFixed(2).replace('.', ',')};${(resB.portFeesBRL + resB.capitalCostBRL).toFixed(2).replace('.', ',')}`,
+        `Custo Total Desembarcado Lote (R$);${resA.totalLandedBRL.toFixed(2).replace('.', ',')};${resB.totalLandedBRL.toFixed(2).replace('.', ',')}`,
+        `Custo Real Unitario Fabrica (R$);${resA.unitLandedBRL.toFixed(2).replace('.', ',')};${resB.unitLandedBRL.toFixed(2).replace('.', ',')}`,
+        '',
+        '2. VEREDITO DE NEGOCIACAO E BALANCO DA MATERIA-PRIMA (FORNECEDOR VENCEDOR)',
+        `Fornecedor Recomendado;${winner.name}`,
+        `Desconto Necessario no Perdedor para Empate;${requiredDiscountPct.toFixed(2).replace('.', ',')}% (Target: US$ ${targetUnitPriceUSD.toFixed(2).replace('.', ',')})`,
+        `Total Ativo / Retorno (Receita + Creditos Tributarios) (R$);${totalAssetBRL.toFixed(2).replace('.', ',')}`,
+        `Total Passivo / Desembolso Total (R$);${totalLiabilityBRL.toFixed(2).replace('.', ',')}`,
+        `Saldo Liquido da Operacao (R$);${netProfitBRL.toFixed(2).replace('.', ',')}`,
+        `Margem Liquida Operacional;${netMarginPct.toFixed(2).replace('.', ',')}%`
+      ];
+
+      const csvContent = '\uFEFF' + lines.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `GlobalTradeOS_Parecer_Comex_${preset.ncm}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast('Parecer Comex exportado em CSV com sucesso!');
+    }
+
+    // =========================================================================
+    // 8. INICIALIZAÇÃO DE LISTENERS
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('productPresetSelect').addEventListener('change', (e) => {
+        loadProductPreset(e.target.value);
+      });
+
+      document.getElementById('customsRegimeSelect').addEventListener('change', () => {
+        applyRegimeRules(true);
+      });
+
+      document.querySelectorAll('.incoterm-btn').forEach(btn => {
+        btn.addEventListener('click', () => setIncoterm(btn.dataset.incoterm));
+      });
+
+      const inputIds = [
+        'inputExchangeRate', 'inputCapitalCost', 'taxII', 'taxIPI', 'taxPisCofins', 'taxICMS', 'inputResalePriceBRL',
+        'nameA', 'unitPriceA', 'qtyA', 'leadTimeA', 'freightA', 'insuranceA', 'portFeesA', 'agreementA',
+        'nameB', 'unitPriceB', 'qtyB', 'leadTimeB', 'freightB', 'insuranceB', 'portFeesB', 'agreementB'
+      ];
+
+      inputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', calculateAll);
+          el.addEventListener('change', calculateAll);
+        }
+      });
+
+      setIncoterm('FOB');
+      loadProductPreset('ecu');
+    });
+  </script>
+</body>
+</html>

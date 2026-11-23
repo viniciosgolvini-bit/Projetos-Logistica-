@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CircularOps | Logística Reversa & Mineração Urbana (Case Samsung)</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js via CDN para gráficos analíticos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Fonte Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            samsung: {
+              blue: '#1428A0',
+              dark: '#0B1554',
+              light: '#E8ECF8',
+              accent: '#2563EB'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #F1F5F9;
+      color: #0F172A;
+    }
+    /* Estilização customizada para inputs numéricos e sliders */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      opacity: 1;
+    }
+    input[type="range"] {
+      accent-color: #1428A0;
+    }
+    .card-shadow {
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Toast / Notificação Flutuante (Substitui alert()) -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden transform transition-all duration-300 translate-y-4 opacity-0">
+    <div class="bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700">
+      <span id="toastIcon" class="text-emerald-400 text-lg">✔</span>
+      <p id="toastMessage" class="text-sm font-medium">Ação concluída com sucesso.</p>
+    </div>
+  </div>
+
+  <!-- Cabeçalho Institucional -->
+  <header class="bg-gradient-to-r from-[#0B1554] via-[#1428A0] to-[#1E3A8A] text-white shadow-lg sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center shrink-0">
+          <!-- Ícone SVG Circularidade / Mineração Urbana -->
+          <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">CircularOps</h1>
+            <span class="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+              Case Referência: Samsung Eletrônicos
+            </span>
+          </div>
+          <p class="text-xs sm:text-sm text-blue-100/90 mt-0.5">
+            Sistema Inteligente de Logística Reversa, Mineração Urbana & Impacto Ambiental (ACV)
+          </p>
+        </div>
+      </div>
+
+      <!-- Botões de Ação Rápida -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <button onclick="openNewLotModal()" class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 border border-white/20 cursor-pointer">
+          <span>+</span> Registrar Lote Devolvido
+        </button>
+        <button onclick="resetDefaultData()" class="px-3.5 py-2 rounded-xl bg-slate-900/40 hover:bg-slate-900/60 text-blue-100 text-xs sm:text-sm font-medium transition border border-white/10 cursor-pointer">
+          Resetar Dados Base
+        </button>
+        <button onclick="exportCSV()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs sm:text-sm font-bold transition shadow-md flex items-center gap-1.5 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Exportar Relatório (CSV)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 flex-1 w-full">
+
+    <!-- Faixa de Contexto Metodológico -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 card-shadow flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div class="space-y-1">
+        <span class="text-xs font-bold uppercase tracking-wider text-[#1428A0]">Escopo Operacional & Economia Circular</span>
+        <p class="text-sm text-slate-600 leading-relaxed">
+          Baseado no programa global <strong>Galaxy Upcycling</strong> e nas diretrizes da <strong>PNRS (Lei 12.305/10)</strong>, este simulador mensura o retorno de dispositivos móveis/eletrônicos, calcula a taxa de recuperação de insumos críticos (cobre, alumínio, lítio e polímeros) e converte métricas operacionais em redução de passivo ambiental.
+        </p>
+      </div>
+      <div class="flex items-center gap-3 shrink-0 bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200">
+        <div class="text-right">
+          <div class="text-[11px] font-semibold text-slate-500 uppercase">Status da Operação</div>
+          <div id="healthBadge" class="text-sm font-bold text-emerald-600">Alta Circularidade</div>
+        </div>
+        <div id="healthDot" class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse"></div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 1: Cards de KPIs em Tempo Real -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- KPI 1: Índice de Devolução -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 card-shadow relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Índice de Devolução (ID)</span>
+          <span class="p-2 rounded-lg bg-blue-50 text-[#1428A0]">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" />
+            </svg>
+          </span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="kpiReturnRate" class="text-3xl font-extrabold text-slate-900">9,00%</span>
+          <span id="kpiTotalReturnedUnits" class="text-xs font-semibold text-slate-500">(4.500 un.)</span>
+        </div>
+        <p id="kpiTotalReturnedWeight" class="text-xs text-slate-500 mt-1.5">Massa total retornada: <strong>2.025,0 kg</strong></p>
+        <div class="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+          <div id="barReturnRate" class="bg-[#1428A0] h-full rounded-full transition-all duration-300" style="width: 9%"></div>
+        </div>
+      </div>
+
+      <!-- KPI 2: Índice de Matéria-Prima Reutilizada (IMR) -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 card-shadow">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Matéria-Prima Reutilizada (IMR)</span>
+          <span class="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="kpiImrPercent" class="text-3xl font-extrabold text-emerald-600">68,22%</span>
+          <span id="kpiImrKg" class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">1.381,5 kg</span>
+        </div>
+        <p id="kpiLandfillRejected" class="text-xs text-slate-500 mt-1.5">Rejeito destinado a aterro/incineração: <strong>643,5 kg</strong></p>
+        <div class="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+          <div id="barImrPercent" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 68.22%"></div>
+        </div>
+      </div>
+
+      <!-- KPI 3: Índice de Matéria-Prima Virgem Evitada (IMVE) -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 card-shadow">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Matéria Virgem Evitada (IMVE)</span>
+          <span class="p-2 rounded-lg bg-indigo-50 text-indigo-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="kpiImvePercent" class="text-3xl font-extrabold text-[#1428A0]">5,53%</span>
+          <span class="text-xs font-medium text-slate-500">do consumo fabril</span>
+        </div>
+        <p id="kpiVirginReplacedNote" class="text-xs text-slate-500 mt-1.5">Substituição direta na linha de produção</p>
+        <div class="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+          <div id="barImvePercent" class="bg-indigo-600 h-full rounded-full transition-all duration-300" style="width: 5.53%"></div>
+        </div>
+      </div>
+
+      <!-- KPI 4: Economia Financeira Direta -->
+      <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-5 card-shadow">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Economia em Matéria-Prima</span>
+          <span class="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </span>
+        </div>
+        <div class="mt-3">
+          <span id="kpiFinancialSaving" class="text-2xl sm:text-3xl font-extrabold text-emerald-400">R$ 117.427,50</span>
+        </div>
+        <p id="kpiAnnualProjection" class="text-xs text-slate-300 mt-1.5">Projeção anualizada: <strong>R$ 1.409.130,00</strong></p>
+        <div class="mt-3 flex items-center gap-1.5 text-[11px] text-emerald-300 font-medium">
+          <span>●</span> Recuperação líquida de custo de aquisição (CAPEX/OPEX)
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 2: Parâmetros Operacionais + Registro de Devoluções -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Coluna Esquerda (4 cols): Parâmetros Gerais da Fábrica -->
+      <div class="lg:col-span-4 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 card-shadow flex flex-col justify-between space-y-5">
+        <div>
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3.5">
+            <div>
+              <h2 class="text-base font-bold text-slate-900">1. Parâmetros da Operação</h2>
+              <p class="text-xs text-slate-500">Base mensal de produção e expedição</p>
+            </div>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-blue-50 text-[#1428A0]">Inputs</span>
+          </div>
+
+          <div class="mt-4 space-y-4">
+            <div>
+              <label for="inputShippedUnits" class="block text-xs font-semibold text-slate-700 mb-1">
+                Total de Unidades Expedidas no Mês (un.)
+              </label>
+              <input type="number" id="inputShippedUnits" min="1" step="100" value="50000"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1428A0] focus:border-transparent transition" />
+            </div>
+
+            <div>
+              <label for="inputUnitWeight" class="block text-xs font-semibold text-slate-700 mb-1">
+                Peso Médio por Unidade Eletrônica (kg)
+              </label>
+              <input type="number" id="inputUnitWeight" min="0.01" step="0.05" value="0.45"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1428A0] focus:border-transparent transition" />
+              <span class="text-[11px] text-slate-400">Ex.: Smartphone + acessórios/embalagem = 0,45 kg</span>
+            </div>
+
+            <div>
+              <label for="inputRawMaterialUsed" class="block text-xs font-semibold text-slate-700 mb-1">
+                Matéria-Prima Total Consumida na Produção (kg)
+              </label>
+              <input type="number" id="inputRawMaterialUsed" min="1" step="500" value="25000"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1428A0] focus:border-transparent transition" />
+            </div>
+
+            <div>
+              <label for="inputVirginCost" class="block text-xs font-semibold text-slate-700 mb-1">
+                Custo Médio da Matéria-Prima Virgem (R$/kg)
+              </label>
+              <input type="number" id="inputVirginCost" min="1" step="5" value="85.00"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1428A0] focus:border-transparent transition" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Fórmulas de Referência Acadêmica -->
+        <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200/80 text-xs text-slate-600 space-y-1.5">
+          <div class="font-bold text-slate-800 flex items-center gap-1.5">
+            <span>📐</span> Fórmulas Aplicadas no Motor:
+          </div>
+          <p>• <strong>ID</strong> = (Unid. Devolvidas ÷ Unid. Expedidas) × 100</p>
+          <p>• <strong>IMR</strong> = (Massa Reaproveitada ÷ Massa Devolvida) × 100</p>
+          <p>• <strong>IMVE</strong> = (Massa Reaproveitada ÷ Consumo Fabril) × 100</p>
+        </div>
+      </div>
+
+      <!-- Coluna Direita (8 cols): Matriz de Devoluções por Motivo -->
+      <div class="lg:col-span-8 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 card-shadow flex flex-col justify-between">
+        <div>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3.5 gap-2">
+            <div>
+              <h2 class="text-base font-bold text-slate-900">2. Triagem de Devoluções & Aproveitamento por Fluxo</h2>
+              <p class="text-xs text-slate-500">Edite as quantidades retornadas e a eficiência de triagem de cada canal reverso</p>
+            </div>
+            <button onclick="openNewLotModal()" class="text-xs font-bold text-[#1428A0] hover:underline flex items-center gap-1 self-start sm:self-auto cursor-pointer">
+              + Somar lote avulso
+            </button>
+          </div>
+
+          <!-- Tabela Responsiva -->
+          <div class="mt-4 overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  <th class="py-3 pr-3">Motivo / Fluxo Reverso</th>
+                  <th class="py-3 px-2">Destinação Técnica</th>
+                  <th class="py-3 px-2 w-28">Qtd. (un.)</th>
+                  <th class="py-3 px-2 w-28">Aproveit. (%)</th>
+                  <th class="py-3 pl-2 text-right">Recuperado (kg)</th>
+                </tr>
+              </thead>
+              <tbody id="reasonsTableBody" class="divide-y divide-slate-100 text-sm">
+                <!-- Preenchido dinamicamente via JS -->
+              </tbody>
+              <tfoot>
+                <tr class="bg-slate-50 font-bold text-slate-900 border-t-2 border-slate-200">
+                  <td colspan="2" class="py-3 px-3 rounded-bl-xl text-xs uppercase tracking-wider">Total Consolidado da Triagem</td>
+                  <td id="tableTotalUnits" class="py-3 px-2 text-sm">4.500 un.</td>
+                  <td id="tableAvgRecovery" class="py-3 px-2 text-sm text-emerald-600">68,2%</td>
+                  <td id="tableTotalRecoveredKg" class="py-3 px-3 text-right text-sm text-emerald-700 rounded-br-xl">1.381,5 kg</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Barra de Distribuição Visual das Destinações -->
+        <div class="mt-5 pt-4 border-t border-slate-100">
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-2">
+            <span>Composição da Massa Devolvida (Aproveitada vs. Rejeito)</span>
+            <span id="massBalanceLabel">1.381,5 kg recuperados / 643,5 kg rejeito</span>
+          </div>
+          <div class="w-full h-3 bg-rose-100 rounded-full overflow-hidden flex">
+            <div id="barRecoveredShare" class="bg-emerald-500 h-full transition-all duration-300" style="width: 68.22%" title="Matéria-Prima Recuperada"></div>
+            <div id="barWasteShare" class="bg-rose-400 h-full transition-all duration-300" style="width: 31.78%" title="Rejeito / Descarte"></div>
+          </div>
+          <div class="flex items-center gap-4 mt-2 text-[11px] text-slate-500">
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Insumo Reintegrado à Cadeia</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span> Passivo / Descarte Não Recuperável</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 3: Impacto Ambiental (ACV) e Mineração Urbana -->
+    <section class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 card-shadow">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-2">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Avaliação do Ciclo de Vida (ACV) & ESG</span>
+          <h2 class="text-base sm:text-lg font-bold text-slate-900">3. Impacto Ambiental Evitado & Mineração Urbana de Metais Críticos</h2>
+        </div>
+        <span class="text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg font-medium">
+          Fatores ACV: 3,2 kg CO₂/kg • 180 L Água/kg
+        </span>
+      </div>
+
+      <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Card CO2 -->
+        <div class="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-4 flex items-start gap-3.5">
+          <div class="p-3 rounded-xl bg-emerald-600 text-white shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+            </svg>
+          </div>
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-emerald-800">Emissões de GEE Evitadas</span>
+            <div class="mt-1 flex items-baseline gap-2">
+              <span id="envCo2Kg" class="text-2xl font-extrabold text-emerald-950">4.420,8 kg</span>
+              <span class="text-xs font-semibold text-emerald-700">CO₂eq</span>
+            </div>
+            <p id="envCo2Tons" class="text-xs text-emerald-800/80 mt-1">Equivalente a <strong>4,42 toneladas</strong> de carbono não emitidas na mineração primária.</p>
+          </div>
+        </div>
+
+        <!-- Card Água -->
+        <div class="bg-sky-50/70 border border-sky-200/80 rounded-2xl p-4 flex items-start gap-3.5">
+          <div class="p-3 rounded-xl bg-sky-600 text-white shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" />
+            </svg>
+          </div>
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-sky-800">Recursos Hídricos Poupados</span>
+            <div class="mt-1 flex items-baseline gap-2">
+              <span id="envWaterLiters" class="text-2xl font-extrabold text-sky-950">248.670 L</span>
+              <span class="text-xs font-semibold text-sky-700">de água</span>
+            </div>
+            <p id="envWaterM3" class="text-xs text-sky-800/80 mt-1">Equivalente a <strong>248,7 m³</strong> economizados no refino químico e fundição.</p>
+          </div>
+        </div>
+
+        <!-- Card Mineração Urbana (Composição Química/Material) -->
+        <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Mineração Urbana (Massa Extraída)</span>
+            <span class="text-[11px] font-semibold text-[#1428A0]">75% Fração Nobre/Base</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="bg-white p-2 rounded-lg border border-slate-200/70">
+              <span class="text-slate-500 block text-[11px]">Polímeros (35%)</span>
+              <strong id="metalPolymers" class="text-slate-900 font-bold">483,5 kg</strong>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-200/70">
+              <span class="text-slate-500 block text-[11px]">Alumínio (22%)</span>
+              <strong id="metalAluminum" class="text-slate-900 font-bold">303,9 kg</strong>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-200/70">
+              <span class="text-slate-500 block text-[11px]">Cobre (14%)</span>
+              <strong id="metalCopper" class="text-amber-700 font-bold">193,4 kg</strong>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-200/70">
+              <span class="text-slate-500 block text-[11px]">Lítio / Ouro / Prata (4%)</span>
+              <strong id="metalPrecious" class="text-emerald-700 font-bold">55,3 kg</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 4: Análise de Pareto (Gráfico) + Plano de Ação Corretivo -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Gráfico Pareto / Comparativo (7 cols) -->
+      <div class="lg:col-span-7 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 card-shadow flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">4. Análise de Pareto: Volume Devolvido vs. Massa Recuperada</h2>
+            <p class="text-xs text-slate-500">Identificação dos ofensores de volume e eficiência de aproveitamento (kg)</p>
+          </div>
+        </div>
+        <div class="relative flex-1 min-h-[280px] w-full">
+          <canvas id="paretoChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Diagnóstico Automático & Plano de Ação Preventivo (5 cols) -->
+      <div class="lg:col-span-5 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 card-shadow flex flex-col justify-between space-y-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-600">Engenharia de Qualidade & Prevenção</span>
+          <h2 class="text-base font-bold text-slate-900 mt-0.5">5. Diagnóstico do Principal Gargalo</h2>
+
+          <!-- Card de Alerta Dinâmico do Maior Ofensor -->
+          <div id="bottleneckCard" class="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-amber-800">Ofensor #1 (Maior Impacto)</span>
+              <span id="bottleneckShareBadge" class="text-xs font-bold px-2 py-0.5 rounded-md bg-amber-200/80 text-amber-950">33,3% do volume</span>
+            </div>
+            <h3 id="bottleneckTitle" class="text-sm font-bold text-slate-900">Coleta Pós-Consumo / Fim de Vida</h3>
+            <p id="bottleneckAction" class="text-xs text-slate-700 leading-relaxed">
+              <strong>Ação Recomendada:</strong> Expandir pontos de coleta Eco-Point em lojas parceiras e aplicar design modular (ecodesign) para elevar a taxa de mineração urbana de 45% para 65%.
+            </p>
+          </div>
+
+          <!-- Matriz Resumida de Ações por Motivo -->
+          <div class="mt-4 space-y-2.5">
+            <div class="text-xs font-bold text-slate-700 uppercase tracking-wider">Diretrizes Preventivas por Causa Raiz:</div>
+            <div id="actionListContainer" class="space-y-2 text-xs">
+              <!-- Preenchido via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 5: Simulador de Cenário Futuro ("E se...") -->
+    <section class="bg-gradient-to-r from-[#0B1554] to-[#1428A0] text-white rounded-2xl p-5 sm:p-7 shadow-xl">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-white/15 pb-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-300">Simulação Preditiva ("What-If Analysis")</span>
+          <h2 class="text-lg sm:text-xl font-extrabold mt-0.5">6. Simulador de Otimização: Prevenção de Falhas + Eficiência de Triagem</h2>
+          <p class="text-xs sm:text-sm text-blue-100/85 mt-1">
+            Arraste os controles para simular quanto a empresa ganha ao reduzir devoluções evitáveis (avarias/defeitos) e aprimorar a bancada de remanufatura.
+          </p>
+        </div>
+        <button onclick="resetSliders()" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold border border-white/20 self-start lg:self-auto cursor-pointer">
+          Zerar Simulação
+        </button>
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <!-- Sliders (6 cols) -->
+        <div class="lg:col-span-6 space-y-5 bg-white/5 p-5 rounded-2xl border border-white/10">
+          <!-- Slider 1 -->
+          <div>
+            <div class="flex justify-between text-xs sm:text-sm font-semibold mb-1.5">
+              <span>Redução de Avarias e Defeitos (Prevenção na Origem)</span>
+              <span id="sliderDefectLabel" class="text-emerald-300 font-extrabold">20%</span>
+            </div>
+            <input type="range" id="sliderDefectReduction" min="0" max="60" value="20" step="5"
+              class="w-full h-2 bg-white/20 rounded-lg cursor-pointer" />
+            <div class="flex justify-between text-[11px] text-blue-200 mt-1">
+              <span>0% (Atual)</span>
+              <span>30% (Embalagem EPE + QA)</span>
+              <span>60% (Meta Excelência)</span>
+            </div>
+          </div>
+
+          <!-- Slider 2 -->
+          <div>
+            <div class="flex justify-between text-xs sm:text-sm font-semibold mb-1.5">
+              <span>Ganho de Eficiência na Triagem / Remanufatura</span>
+              <span id="sliderTriageLabel" class="text-emerald-300 font-extrabold">+15 p.p.</span>
+            </div>
+            <input type="range" id="sliderTriageGain" min="0" max="30" value="15" step="5"
+              class="w-full h-2 bg-white/20 rounded-lg cursor-pointer" />
+            <div class="flex justify-between text-[11px] text-blue-200 mt-1">
+              <span>+0 p.p. (Atual)</span>
+              <span>+15 p.p. (Bancada Automatizada)</span>
+              <span>+30 p.p. (Teto Técnico)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resultados Projetados (6 cols) -->
+        <div class="lg:col-span-6 grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div class="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl p-4">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-blue-200">Ganho Financeiro Extra</span>
+            <div id="simExtraMoney" class="text-xl sm:text-2xl font-extrabold text-emerald-300 mt-1.5">+ R$ 19.890,00</div>
+            <p class="text-[11px] text-blue-100/80 mt-1">Economia adicional mensal em insumos e não-retrabalho</p>
+          </div>
+
+          <div class="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl p-4">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-blue-200">Novo IMR Projetado</span>
+            <div id="simNewImr" class="text-xl sm:text-2xl font-extrabold text-white mt-1.5">83,2%</div>
+            <p id="simExtraKg" class="text-[11px] text-emerald-300 mt-1">+ 185,4 kg recuperados/mês</p>
+          </div>
+
+          <div class="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl p-4">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-blue-200">CO₂ Extra Evitado</span>
+            <div id="simExtraCo2" class="text-xl sm:text-2xl font-extrabold text-emerald-300 mt-1.5">+ 593,3 kg</div>
+            <p class="text-[11px] text-blue-100/80 mt-1">Redução adicional de pegada de carbono</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="bg-white border-t border-slate-200 mt-10 py-5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+      <p><strong>CircularOps</strong> — Projeto de Engenharia Logística, Economia Circular & ESG (Case Referência: Samsung Eletrônicos).</p>
+      <p>Desenvolvido para análise de KPIs de Logística Reversa (ID, IMR, IMVE e ACV).</p>
+    </div>
+  </footer>
+
+  <!-- Modal para Adicionar Novo Lote de Devolução -->
+  <div id="newLotModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-slate-900">Registrar Novo Lote de Devolução</h3>
+        <button onclick="closeNewLotModal()" class="text-slate-400 hover:text-slate-700 font-bold text-lg cursor-pointer">✕</button>
+      </div>
+      <p class="text-xs text-slate-500">Some unidades recém-chegadas na doca de logística reversa a uma das categorias existentes:</p>
+      
+      <div class="space-y-3">
+        <div>
+          <label for="modalReasonSelect" class="block text-xs font-semibold text-slate-700 mb-1">Categoria de Triagem</label>
+          <select id="modalReasonSelect" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-[#1428A0] focus:outline-none">
+            <!-- Opções via JS -->
+          </select>
+        </div>
+        <div>
+          <label for="modalAddUnits" class="block text-xs font-semibold text-slate-700 mb-1">Quantidade Recebida no Lote (un.)</label>
+          <input type="number" id="modalAddUnits" min="1" value="250" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-900 focus:ring-2 focus:ring-[#1428A0] focus:outline-none" />
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeNewLotModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer">Cancelar</button>
+        <button onclick="confirmAddLot()" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#1428A0] hover:bg-[#0B1554] text-white cursor-pointer">Adicionar ao Painel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lógica JavaScript Completa -->
+  <script>
+    // =========================================================================
+    // 1. DADOS INICIAIS & CONFIGURAÇÕES DO CASE SAMSUNG ELETRÔNICOS
+    // =========================================================================
+    const DEFAULT_PARAMS = {
+      shippedUnits: 50000,
+      unitWeight: 0.45,
+      rawMaterialUsed: 25000,
+      virginCost: 85.00
+    };
+
+    const DEFAULT_REASONS = [
+      {
+        id: 'open_box',
+        name: 'Arrependimento / Open Box',
+        destination: 'Reuso Direto (Reembalagem Certificada)',
+        badgeColor: 'bg-emerald-100 text-emerald-800',
+        units: 1200,
+        recoveryRate: 95,
+        preventiveAction: 'Aprimorar especificações técnicas e comparador de compatibilidade no e-commerce para reduzir compras equivocadas.'
+      },
+      {
+        id: 'transport_damage',
+        name: 'Avaria no Transporte / Embalagem',
+        destination: 'Recuperação de Módulos & Carcaça',
+        badgeColor: 'bg-blue-100 text-blue-800',
+        units: 850,
+        recoveryRate: 75,
+        preventiveAction: 'Substituir calços internos por espuma EPE de alta densidade e auditar transportadoras com maior índice de sinistro.'
+      },
+      {
+        id: 'technical_defect',
+        name: 'Defeito Técnico / Bateria / Placa',
+        destination: 'Remanufatura (Assistência Autorizada)',
+        badgeColor: 'bg-indigo-100 text-indigo-800',
+        units: 950,
+        recoveryRate: 65,
+        preventiveAction: 'Aplicar testes automatizados de estresse térmico (QA) no lote de baterias e retroalimentar engenharia de fornecedores.'
+      },
+      {
+        id: 'post_consumer',
+        name: 'Coleta Pós-Consumo / Fim de Vida',
+        destination: 'Mineração Urbana (Metais & Polímeros)',
+        badgeColor: 'bg-amber-100 text-amber-800',
+        units: 1500,
+        recoveryRate: 45,
+        preventiveAction: 'Expandir pontos de coleta Eco-Point e adotar parafusos padronizados (ecodesign) para acelerar desmontagem e extração.'
+      }
+    ];
+
+    // Estado reativo da aplicação
+    let state = {
+      params: { ...DEFAULT_PARAMS },
+      reasons: JSON.parse(JSON.stringify(DEFAULT_REASONS)),
+      simDefectReduction: 20,
+      simTriageGain: 15
+    };
+
+    let paretoChartInstance = null;
+
+    // =========================================================================
+    // 2. UTILITÁRIOS DE FORMATAÇÃO (PT-BR)
+    // =========================================================================
+    function formatCurrency(value) {
+      return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function formatNumber(value, decimals = 1) {
+      return value.toLocaleString('pt-BR', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+
+    function formatInteger(value) {
+      return Math.round(value).toLocaleString('pt-BR');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const msgEl = document.getElementById('toastMessage');
+      msgEl.textContent = message;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-4', 'opacity-0');
+      }, 10);
+      setTimeout(() => {
+        toast.classList.add('translate-y-4', 'opacity-0');
+        setTimeout(() => toast.classList.add('hidden'), 300);
+      }, 3200);
+    }
+
+    // =========================================================================
+    // 3. RENDERIZAÇÃO DA TABELA DE MOTIVOS DE DEVOLUÇÃO
+    // =========================================================================
+    function renderReasonsTable() {
+      const tbody = document.getElementById('reasonsTableBody');
+      tbody.innerHTML = '';
+
+      state.reasons.forEach((reason, index) => {
+        const recoveredKg = reason.units * state.params.unitWeight * (reason.recoveryRate / 100);
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition';
+
+        tr.innerHTML = `
+          <td class="py-3 pr-3">
+            <div class="font-bold text-slate-900 text-xs sm:text-sm">${reason.name}</div>
+          </td>
+          <td class="py-3 px-2">
+            <span class="inline-block text-[11px] font-semibold px-2.5 py-1 rounded-lg ${reason.badgeColor}">
+              ${reason.destination}
+            </span>
+          </td>
+          <td class="py-3 px-2">
+            <input type="number" min="0" step="10" value="${reason.units}"
+              data-index="${index}" data-field="units"
+              class="reason-input w-24 px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs sm:text-sm font-semibold text-slate-900 focus:ring-2 focus:ring-[#1428A0] focus:outline-none" />
+          </td>
+          <td class="py-3 px-2">
+            <div class="flex items-center gap-1">
+              <input type="number" min="0" max="100" step="5" value="${reason.recoveryRate}"
+                data-index="${index}" data-field="recoveryRate"
+                class="reason-input w-20 px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs sm:text-sm font-semibold text-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+              <span class="text-xs font-bold text-slate-400">%</span>
+            </div>
+          </td>
+          <td class="py-3 pl-2 text-right font-bold text-slate-800 text-xs sm:text-sm" id="rowRecoveredKg-${index}">
+            ${formatNumber(recoveredKg, 1)} kg
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Listeners para edição direta na tabela
+      document.querySelectorAll('.reason-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const idx = parseInt(e.target.dataset.index, 10);
+          const field = e.target.dataset.field;
+          let val = parseFloat(e.target.value);
+          if (isNaN(val) || val < 0) val = 0;
+          if (field === 'recoveryRate' && val > 100) val = 100;
+
+          state.reasons[idx][field] = val;
+          recalculateAll(false); // Atualiza sem recriar os inputs para manter foco
+        });
+      });
+    }
+
+    // =========================================================================
+    // 4. MOTOR DE CÁLCULO PRINCIPAL (KPIs, ACV, PARETO E SIMULAÇÃO)
+    // =========================================================================
+    function recalculateAll(rebuildTable = false) {
+      if (rebuildTable) {
+        renderReasonsTable();
+      }
+
+      const { shippedUnits, unitWeight, rawMaterialUsed, virginCost } = state.params;
+
+      // Consolidação das devoluções
+      let totalReturnedUnits = 0;
+      let totalReturnedKg = 0;
+      let totalRecoveredKg = 0;
+
+      const reasonMetrics = state.reasons.map((r, idx) => {
+        const returnedKg = r.units * unitWeight;
+        const recoveredKg = returnedKg * (r.recoveryRate / 100);
+        totalReturnedUnits += r.units;
+        totalReturnedKg += returnedKg;
+        totalRecoveredKg += recoveredKg;
+
+        // Atualiza célula individual da linha sem perder foco do input
+        const cell = document.getElementById(`rowRecoveredKg-${idx}`);
+        if (cell) {
+          cell.textContent = `${formatNumber(recoveredKg, 1)} kg`;
+        }
+
+        return {
+          ...r,
+          returnedKg,
+          recoveredKg
+        };
+      });
+
+      const rejectedKg = Math.max(0, totalReturnedKg - totalRecoveredKg);
+
+      // KPIs Centrais
+      const returnRatePercent = shippedUnits > 0 ? (totalReturnedUnits / shippedUnits) * 100 : 0;
+      const imrPercent = totalReturnedKg > 0 ? (totalRecoveredKg / totalReturnedKg) * 100 : 0;
+      const imvePercent = rawMaterialUsed > 0 ? (totalRecoveredKg / rawMaterialUsed) * 100 : 0;
+      const financialSaving = totalRecoveredKg * virginCost;
+      const annualSaving = financialSaving * 12;
+
+      // Atualiza Cards de KPI
+      document.getElementById('kpiReturnRate').textContent = `${formatNumber(returnRatePercent, 2)}%`;
+      document.getElementById('kpiTotalReturnedUnits').textContent = `(${formatInteger(totalReturnedUnits)} un.)`;
+      document.getElementById('kpiTotalReturnedWeight').innerHTML = `Massa total retornada: <strong>${formatNumber(totalReturnedKg, 1)} kg</strong>`;
+      document.getElementById('barReturnRate').style.width = `${Math.min(100, returnRatePercent * 3)}%`;
+
+      document.getElementById('kpiImrPercent').textContent = `${formatNumber(imrPercent, 2)}%`;
+      document.getElementById('kpiImrKg').textContent = `${formatNumber(totalRecoveredKg, 1)} kg`;
+      document.getElementById('kpiLandfillRejected').innerHTML = `Rejeito destinado a aterro/incineração: <strong>${formatNumber(rejectedKg, 1)} kg</strong>`;
+      document.getElementById('barImrPercent').style.width = `${Math.min(100, imrPercent)}%`;
+
+      document.getElementById('kpiImvePercent').textContent = `${formatNumber(imvePercent, 2)}%`;
+      document.getElementById('barImvePercent').style.width = `${Math.min(100, imvePercent * 4)}%`;
+
+      document.getElementById('kpiFinancialSaving').textContent = formatCurrency(financialSaving);
+      document.getElementById('kpiAnnualProjection').innerHTML = `Projeção anualizada: <strong>${formatCurrency(annualSaving)}</strong>`;
+
+      // Status de Circularidade no Topo
+      const healthBadge = document.getElementById('healthBadge');
+      const healthDot = document.getElementById('healthDot');
+      if (imrPercent >= 65) {
+        healthBadge.textContent = 'Alta Circularidade (Benchmark)';
+        healthBadge.className = 'text-sm font-bold text-emerald-600';
+        healthDot.className = 'w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse';
+      } else if (imrPercent >= 45) {
+        healthBadge.textContent = 'Circularidade Moderada';
+        healthBadge.className = 'text-sm font-bold text-amber-600';
+        healthDot.className = 'w-3.5 h-3.5 rounded-full bg-amber-500 animate-pulse';
+      } else {
+        healthBadge.textContent = 'Alerta: Alto Passivo de Descarte';
+        healthBadge.className = 'text-sm font-bold text-rose-600';
+        healthDot.className = 'w-3.5 h-3.5 rounded-full bg-rose-500 animate-pulse';
+      }
+
+      // Totais da Tabela e Barra de Balanço de Massa
+      document.getElementById('tableTotalUnits').textContent = `${formatInteger(totalReturnedUnits)} un.`;
+      document.getElementById('tableAvgRecovery').textContent = `${formatNumber(imrPercent, 1)}%`;
+      document.getElementById('tableTotalRecoveredKg').textContent = `${formatNumber(totalRecoveredKg, 1)} kg`;
+
+      const wastePercent = Math.max(0, 100 - imrPercent);
+      document.getElementById('massBalanceLabel').textContent = `${formatNumber(totalRecoveredKg, 1)} kg recuperados / ${formatNumber(rejectedKg, 1)} kg rejeito`;
+      document.getElementById('barRecoveredShare').style.width = `${imrPercent}%`;
+      document.getElementById('barWasteShare').style.width = `${wastePercent}%`;
+
+      // Impacto Ambiental (ACV) e Mineração Urbana
+      const co2AvoidedKg = totalRecoveredKg * 3.2;
+      const co2AvoidedTons = co2AvoidedKg / 1000;
+      const waterSavedLiters = totalRecoveredKg * 180;
+      const waterSavedM3 = waterSavedLiters / 1000;
+
+      document.getElementById('envCo2Kg').textContent = `${formatNumber(co2AvoidedKg, 1)} kg`;
+      document.getElementById('envCo2Tons').innerHTML = `Equivalente a <strong>${formatNumber(co2AvoidedTons, 2)} toneladas</strong> de carbono não emitidas na mineração primária.`;
+
+      document.getElementById('envWaterLiters').textContent = `${formatInteger(waterSavedLiters)} L`;
+      document.getElementById('envWaterM3').innerHTML = `Equivalente a <strong>${formatNumber(waterSavedM3, 1)} m³</strong> economizados no refino químico e fundição.`;
+
+      document.getElementById('metalPolymers').textContent = `${formatNumber(totalRecoveredKg * 0.35, 1)} kg`;
+      document.getElementById('metalAluminum').textContent = `${formatNumber(totalRecoveredKg * 0.22, 1)} kg`;
+      document.getElementById('metalCopper').textContent = `${formatNumber(totalRecoveredKg * 0.14, 1)} kg`;
+      document.getElementById('metalPrecious').textContent = `${formatNumber(totalRecoveredKg * 0.04, 1)} kg`;
+
+      // Análise de Pareto & Diagnóstico Automático
+      updateParetoAndActions(reasonMetrics, totalReturnedUnits);
+
+      // Simulador de Cenário Futuro ("E se...")
+      updateFutureSimulation(reasonMetrics, totalReturnedKg, totalRecoveredKg, imrPercent);
+    }
+
+    // =========================================================================
+    // 5. GRÁFICO DE PARETO & PLANO DE AÇÃO PREVENTIVO
+    // =========================================================================
+    function updateParetoAndActions(reasonMetrics, totalReturnedUnits) {
+      // Ordena do maior volume devolvido para o menor (Regra 80/20)
+      const sorted = [...reasonMetrics].sort((a, b) => b.units - a.units);
+      const topOffender = sorted[0];
+
+      if (topOffender && totalReturnedUnits > 0) {
+        const share = (topOffender.units / totalReturnedUnits) * 100;
+        document.getElementById('bottleneckShareBadge').textContent = `${formatNumber(share, 1)}% do volume`;
+        document.getElementById('bottleneckTitle').textContent = `${topOffender.name} (${formatInteger(topOffender.units)} un.)`;
+        document.getElementById('bottleneckAction').innerHTML = `<strong>Plano de Ação Prioritário:</strong> ${topOffender.preventiveAction}`;
+      } else {
+        document.getElementById('bottleneckShareBadge').textContent = '0%';
+        document.getElementById('bottleneckTitle').textContent = 'Nenhuma devolução registrada';
+        document.getElementById('bottleneckAction').textContent = 'Insira quantidades nos fluxos acima para gerar o diagnóstico automático.';
+      }
+
+      // Lista de diretrizes por motivo
+      const actionContainer = document.getElementById('actionListContainer');
+      actionContainer.innerHTML = sorted.map((item, i) => `
+        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 flex items-start gap-2.5">
+          <span class="w-5 h-5 rounded-full bg-[#1428A0] text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">${i + 1}</span>
+          <div>
+            <div class="font-bold text-slate-800">${item.name} <span class="text-slate-400 font-normal">(${formatInteger(item.units)} un.)</span></div>
+            <p class="text-slate-600 mt-0.5 leading-snug">${item.preventiveAction}</p>
+          </div>
+        </div>
+      `).join('');
+
+      // Atualização do Gráfico Chart.js
+      const labels = sorted.map(r => r.name.split('/')[0].trim());
+      const returnedData = sorted.map(r => Number(r.returnedKg.toFixed(1)));
+      const recoveredData = sorted.map(r => Number(r.recoveredKg.toFixed(1)));
+
+      const ctx = document.getElementById('paretoChart').getContext('2d');
+      if (paretoChartInstance) {
+        paretoChartInstance.data.labels = labels;
+        paretoChartInstance.data.datasets[0].data = returnedData;
+        paretoChartInstance.data.datasets[1].data = recoveredData;
+        paretoChartInstance.update();
+      } else {
+        paretoChartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Massa Total Devolvida (kg)',
+                data: returnedData,
+                backgroundColor: '#1428A0',
+                borderRadius: 6,
+                barPercentage: 0.65
+              },
+              {
+                label: 'Matéria-Prima Recuperada (kg)',
+                data: recoveredData,
+                backgroundColor: '#10B981',
+                borderRadius: 6,
+                barPercentage: 0.65
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: {
+                  font: { family: 'Inter', size: 12, weight: '600' },
+                  usePointStyle: true
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return `${context.dataset.label}: ${formatNumber(context.parsed.y, 1)} kg`;
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: { color: '#F1F5F9' },
+                ticks: {
+                  font: { family: 'Inter', size: 11 },
+                  callback: (val) => `${val} kg`
+                }
+              },
+              x: {
+                grid: { display: false },
+                ticks: {
+                  font: { family: 'Inter', size: 11, weight: '600' }
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // =========================================================================
+    // 6. SIMULADOR DE CENÁRIO FUTURO ("E SE...")
+    // =========================================================================
+    function updateFutureSimulation(reasonMetrics, currentReturnedKg, currentRecoveredKg, currentImr) {
+      const defectRed = state.simDefectReduction / 100;
+      const triageGain = state.simTriageGain;
+      const { unitWeight, virginCost } = state.params;
+
+      document.getElementById('sliderDefectLabel').textContent = `${state.simDefectReduction}%`;
+      document.getElementById('sliderTriageLabel').textContent = `+${state.simTriageGain} p.p.`;
+
+      let simReturnedKg = 0;
+      let simRecoveredKg = 0;
+      let avoidedDefectKg = 0;
+
+      reasonMetrics.forEach(r => {
+        let adjustedUnits = r.units;
+        // A redução de falhas atua sobre avarias no transporte e defeitos técnicos
+        if (r.id === 'transport_damage' || r.id === 'technical_defect') {
+          const preventedUnits = r.units * defectRed;
+          adjustedUnits = r.units - preventedUnits;
+          avoidedDefectKg += preventedUnits * unitWeight;
+        }
+
+        const newRecoveryRate = Math.min(100, r.recoveryRate + triageGain);
+        const itemReturnedKg = adjustedUnits * unitWeight;
+        const itemRecoveredKg = itemReturnedKg * (newRecoveryRate / 100);
+
+        simReturnedKg += itemReturnedKg;
+        simRecoveredKg += itemRecoveredKg;
+      });
+
+      const simImr = simReturnedKg > 0 ? (simRecoveredKg / simReturnedKg) * 100 : currentImr;
+
+      // Ganho financeiro = (economia com maior recuperação de triagem + economia por evitar avaria/retrabalho de 40% do valor do insumo)
+      const extraRecoveredKg = simRecoveredKg - currentRecoveredKg;
+      const financialGainFromTriage = extraRecoveredKg * virginCost;
+      const financialGainFromPrevention = avoidedDefectKg * (virginCost * 0.45);
+      const totalExtraMoney = Math.max(0, financialGainFromTriage + financialGainFromPrevention);
+
+      // CO2 extra evitado considera massa extra recuperada + massa não perdida por avaria
+      const totalPositiveMassDelta = Math.max(0, extraRecoveredKg + avoidedDefectKg);
+      const extraCo2Kg = totalPositiveMassDelta * 3.2;
+
+      document.getElementById('simExtraMoney').textContent = `+ ${formatCurrency(totalExtraMoney)}`;
+      document.getElementById('simNewImr').textContent = `${formatNumber(simImr, 1)}%`;
+      document.getElementById('simExtraKg').textContent = `${extraRecoveredKg >= 0 ? '+' : ''}${formatNumber(extraRecoveredKg, 1)} kg na triagem`;
+      document.getElementById('simExtraCo2').textContent = `+ ${formatNumber(extraCo2Kg, 1)} kg`;
+    }
+
+    // =========================================================================
+    // 7. MODAL DE NOVO LOTE, RESET E EXPORTAÇÃO CSV
+    // =========================================================================
+    function openNewLotModal() {
+      const select = document.getElementById('modalReasonSelect');
+      select.innerHTML = state.reasons.map((r, i) => `<option value="${i}">${r.name}</option>`).join('');
+      document.getElementById('modalAddUnits').value = 250;
+      document.getElementById('newLotModal').classList.remove('hidden');
+    }
+
+    function closeNewLotModal() {
+      document.getElementById('newLotModal').classList.add('hidden');
+    }
+
+    function confirmAddLot() {
+      const idx = parseInt(document.getElementById('modalReasonSelect').value, 10);
+      const addUnits = parseInt(document.getElementById('modalAddUnits').value, 10);
+
+      if (isNaN(addUnits) || addUnits <= 0) {
+        showToast('Informe uma quantidade válida maior que zero.');
+        return;
+      }
+
+      state.reasons[idx].units += addUnits;
+      closeNewLotModal();
+      recalculateAll(true);
+      showToast(`+${addUnits} unidades adicionadas em "${state.reasons[idx].name}".`);
+    }
+
+    function resetDefaultData() {
+      state.params = { ...DEFAULT_PARAMS };
+      state.reasons = JSON.parse(JSON.stringify(DEFAULT_REASONS));
+      state.simDefectReduction = 20;
+      state.simTriageGain = 15;
+
+      document.getElementById('inputShippedUnits').value = DEFAULT_PARAMS.shippedUnits;
+      document.getElementById('inputUnitWeight').value = DEFAULT_PARAMS.unitWeight;
+      document.getElementById('inputRawMaterialUsed').value = DEFAULT_PARAMS.rawMaterialUsed;
+      document.getElementById('inputVirginCost').value = DEFAULT_PARAMS.virginCost;
+
+      document.getElementById('sliderDefectReduction').value = 20;
+      document.getElementById('sliderTriageGain').value = 15;
+
+      recalculateAll(true);
+      showToast('Parâmetros e lotes restaurados para o cenário base Samsung.');
+    }
+
+    function resetSliders() {
+      state.simDefectReduction = 0;
+      state.simTriageGain = 0;
+      document.getElementById('sliderDefectReduction').value = 0;
+      document.getElementById('sliderTriageGain').value = 0;
+      recalculateAll(false);
+    }
+
+    function exportCSV() {
+      const { shippedUnits, unitWeight, rawMaterialUsed, virginCost } = state.params;
+      let totalReturnedUnits = 0;
+      let totalReturnedKg = 0;
+      let totalRecoveredKg = 0;
+
+      const lines = [
+        'RELATORIO DE LOGISTICA REVERSA E MINERACAO URBANA - CASE SAMSUNG',
+        `Data de Geracao;${new Date().toLocaleDateString('pt-BR')}`,
+        '',
+        '1. PARAMETROS OPERACIONAIS',
+        `Total Unidades Expedidas;${shippedUnits}`,
+        `Peso Medio por Unidade (kg);${unitWeight.toString().replace('.', ',')}`,
+        `Materia-Prima Consumida na Producao (kg);${rawMaterialUsed}`,
+        `Custo Materia-Prima Virgem (R$/kg);${virginCost.toFixed(2).replace('.', ',')}`,
+        '',
+        '2. DETALHAMENTO POR MOTIVO DE DEVOLUCAO',
+        'Motivo;Destinacao Tecnica;Unidades Devolvidas;Massa Devolvida (kg);Aproveitamento (%);Massa Recuperada (kg)'
+      ];
+
+      state.reasons.forEach(r => {
+        const retKg = r.units * unitWeight;
+        const recKg = retKg * (r.recoveryRate / 100);
+        totalReturnedUnits += r.units;
+        totalReturnedKg += retKg;
+        totalRecoveredKg += recKg;
+
+        lines.push(`${r.name};${r.destination};${r.units};${retKg.toFixed(2).replace('.', ',')};${r.recoveryRate}%;${recKg.toFixed(2).replace('.', ',')}`);
+      });
+
+      const idPercent = shippedUnits > 0 ? (totalReturnedUnits / shippedUnits) * 100 : 0;
+      const imrPercent = totalReturnedKg > 0 ? (totalRecoveredKg / totalReturnedKg) * 100 : 0;
+      const imvePercent = rawMaterialUsed > 0 ? (totalRecoveredKg / rawMaterialUsed) * 100 : 0;
+      const saving = totalRecoveredKg * virginCost;
+      const co2 = totalRecoveredKg * 3.2;
+      const water = totalRecoveredKg * 180;
+
+      lines.push(
+        '',
+        '3. INDICADORES CONSOLIDADOS (KPIs & ACV)',
+        `Indice de Devolucao (ID);${idPercent.toFixed(2).replace('.', ',')}%`,
+        `Indice de Materia-Prima Reutilizada (IMR);${imrPercent.toFixed(2).replace('.', ',')}%`,
+        `Indice de Materia-Prima Virgem Evitada (IMVE);${imvePercent.toFixed(2).replace('.', ',')}%`,
+        `Massa Total Recuperada (kg);${totalRecoveredKg.toFixed(2).replace('.', ',')}`,
+        `Economia Financeira Mensal (R$);${saving.toFixed(2).replace('.', ',')}`,
+        `Emissoes CO2 Evitadas (kg);${co2.toFixed(2).replace('.', ',')}`,
+        `Agua Economizada (Litros);${water.toFixed(0)}`
+      );
+
+      // Adiciona BOM UTF-8 para abrir com acentos corretos no Excel
+      const csvContent = '\uFEFF' + lines.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'CircularOps_Relatorio_Logistica_Reversa.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast('Relatório CSV exportado com sucesso!');
+    }
+
+    // =========================================================================
+    // 8. INICIALIZAÇÃO DE EVENTOS
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      // Listeners dos parâmetros gerais
+      document.getElementById('inputShippedUnits').addEventListener('input', (e) => {
+        state.params.shippedUnits = Math.max(0, parseFloat(e.target.value) || 0);
+        recalculateAll(false);
+      });
+      document.getElementById('inputUnitWeight').addEventListener('input', (e) => {
+        state.params.unitWeight = Math.max(0, parseFloat(e.target.value) || 0);
+        recalculateAll(false);
+      });
+      document.getElementById('inputRawMaterialUsed').addEventListener('input', (e) => {
+        state.params.rawMaterialUsed = Math.max(0, parseFloat(e.target.value) || 0);
+        recalculateAll(false);
+      });
+      document.getElementById('inputVirginCost').addEventListener('input', (e) => {
+        state.params.virginCost = Math.max(0, parseFloat(e.target.value) || 0);
+        recalculateAll(false);
+      });
+
+      // Listeners dos sliders de simulação futura
+      document.getElementById('sliderDefectReduction').addEventListener('input', (e) => {
+        state.simDefectReduction = parseInt(e.target.value, 10) || 0;
+        recalculateAll(false);
+      });
+      document.getElementById('sliderTriageGain').addEventListener('input', (e) => {
+        state.simTriageGain = parseInt(e.target.value, 10) || 0;
+        recalculateAll(false);
+      });
+
+      // Renderização inicial
+      recalculateAll(true);
+    });
+  </script>
+</body>
+</html>

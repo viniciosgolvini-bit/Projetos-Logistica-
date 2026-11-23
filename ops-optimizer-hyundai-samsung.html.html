@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpsOptimizer — Frota, Produção Híbrida & IA (Hyundai & Samsung)</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #131b33;
+      --panel-2: #192444;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-2: #22c55e;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --border: rgba(148, 163, 184, 0.18);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 24px;
+    }
+
+    .container { max-width: 1160px; margin: 0 auto; }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    header h1 { font-size: 1.4rem; margin-bottom: 4px; }
+    header p { color: var(--muted); font-size: 0.92rem; }
+
+    .badge {
+      background: rgba(56, 189, 248, 0.14);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: var(--panel);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #061021;
+      border-color: var(--accent);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .card h2 {
+      font-size: 1.05rem;
+      margin-bottom: 12px;
+      color: var(--accent);
+    }
+
+    .field { margin-bottom: 12px; }
+    .field label {
+      display: block;
+      font-size: 0.84rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 11px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+
+    .kpi {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .kpi .label { font-size: 0.78rem; color: var(--muted); margin-bottom: 4px; }
+    .kpi .value { font-size: 1.25rem; font-weight: 700; }
+    .kpi .sub { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+    .good { color: var(--accent-2); }
+    .warn { color: var(--warn); }
+    .bad { color: var(--danger); }
+
+    .box-decision {
+      background: var(--panel-2);
+      border-left: 4px solid var(--accent-2);
+      padding: 14px;
+      border-radius: 8px;
+      margin-top: 12px;
+      font-size: 0.92rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.88rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th { color: var(--muted); font-weight: 600; }
+
+    .btn-reset {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .btn-reset:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>OpsOptimizer — Distribuição, Produção Híbrida &amp; IA</h1>
+        <p>Simulador de redução de custos e autonomia operacional • Inspirado em Hyundai &amp; Samsung</p>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <span class="badge">Projeto 3 • Supply Chain</span>
+        <button class="btn-reset" onclick="resetDefaults()">Resetar Padrão</button>
+      </div>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="openTab('frota', this)">1. Distribuição (Frota)</button>
+      <button class="tab-btn" onclick="openTab('producao', this)">2. Produção Híbrida (Make or Buy)</button>
+      <button class="tab-btn" onclick="openTab('servicos', this)">3. Serviços (IA vs. Humano)</button>
+    </div>
+
+    <!-- ABA 1: FROTA -->
+    <section id="frota" class="tab-content active">
+      <div class="grid-2">
+        <div class="card">
+          <h2>Parâmetros de Distribuição</h2>
+          <div class="field">
+            <label>Quilometragem mensal total (km/mês)</label>
+            <input type="number" id="kmMensal" value="18000" min="500" step="500" oninput="calcFrota()" />
+          </div>
+          <div class="field">
+            <label>Custo fixo mensal da frota própria (R$ — depreciação, seguro, motorista, IPVA)</label>
+            <input type="number" id="custoFixoFrota" value="14500" min="0" step="500" oninput="calcFrota()" />
+          </div>
+          <div class="field">
+            <label>Custo variável da frota própria por km (R$/km — diesel, pneu, manutenção)</label>
+            <input type="number" id="custoVarFrota" value="2.40" min="0.1" step="0.1" oninput="calcFrota()" />
+          </div>
+          <div class="field">
+            <label>Tarifa da frota terceirizada por km rodado (R$/km)</label>
+            <input type="number" id="tarifaTerceiro" value="3.85" min="0.1" step="0.1" oninput="calcFrota()" />
+          </div>
+          <div class="field">
+            <label>% da rota que é fixa/recorrente (ideal para frota própria)</label>
+            <input type="number" id="pctRotaFixa" value="65" min="0" max="100" step="5" oninput="calcFrota()" />
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Diagnóstico &amp; Ponto de Equilíbrio</h2>
+          <div class="grid-3">
+            <div class="kpi">
+              <div class="label">Break-Even (km/mês)</div>
+              <div class="value" id="breakEvenKm">-</div>
+              <div class="sub">Acima disso, frota própria ganha no custo/km</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Custo 100% Terceirizada</div>
+              <div class="value" id="custo100Terceiro">-</div>
+              <div class="sub" id="custoPorKmTerceiro">-</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Economia do Mix Híbrido</div>
+              <div class="value good" id="economiaFrota">-</div>
+              <div class="sub" id="custoMixAtual">-</div>
+            </div>
+          </div>
+
+          <div class="box-decision" id="decisaoFrota"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 2: PRODUÇÃO HÍBRIDA -->
+    <section id="producao" class="tab-content">
+      <div class="grid-2">
+        <div class="card">
+          <h2>Produção Própria vs. Terceirizada (Sem Dependência)</h2>
+          <div class="field">
+            <label>Demanda mensal de unidades</label>
+            <input type="number" id="demandaProd" value="4000" min="100" step="100" oninput="calcProducao()" />
+          </div>
+          <div class="field">
+            <label>% produzido internamente (núcleo base + matéria-prima própria)</label>
+            <input type="number" id="pctInterno" value="40" min="10" max="100" step="5" oninput="calcProducao()" />
+          </div>
+          <div class="field">
+            <label>Custo unitário interno (matéria-prima base + hora-máquina + energia)</label>
+            <input type="number" id="custoUnitInterno" value="42.00" min="1" step="0.5" oninput="calcProducao()" />
+          </div>
+          <div class="field">
+            <label>Custo unitário no terceiro (matéria-prima própria + frete ida/volta + beneficiamento)</label>
+            <input type="number" id="custoUnitTerceiro" value="37.50" min="1" step="0.5" oninput="calcProducao()" />
+          </div>
+          <div class="field">
+            <label>Consumo diário médio da operação (unidades/dia)</label>
+            <input type="number" id="consumoDia" value="160" min="1" step="10" oninput="calcProducao()" />
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Autonomia &amp; Custo da Estratégia Híbrida</h2>
+          <div class="grid-3">
+            <div class="kpi">
+              <div class="label">Produção Interna Mensal</div>
+              <div class="value" id="qtdInterna">-</div>
+              <div class="sub" id="qtdExterna">-</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Autonomia se o 3º Falhar</div>
+              <div class="value good" id="diasAutonomia">-</div>
+              <div class="sub">Dias operando sem depender do parceiro</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Custo Total Mensal</div>
+              <div class="value" id="custoTotalProd">-</div>
+              <div class="sub" id="custoMedioProd">-</div>
+            </div>
+          </div>
+
+          <div class="box-decision" id="decisaoProducao"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 3: SERVIÇOS (IA VS HUMANO) -->
+    <section id="servicos" class="tab-content">
+      <div class="grid-2">
+        <div class="card">
+          <h2>Alocação de Serviços: IA vs. Humano</h2>
+          <div class="field">
+            <label>Volume mensal de tarefas operacionais/atendimentos</label>
+            <input type="number" id="volTarefas" value="6000" min="100" step="100" oninput="calcServicos()" />
+          </div>
+          <div class="field">
+            <label>% de tarefas repetitivas/padronizadas automatizadas por IA</label>
+            <input type="number" id="pctIA" value="60" min="0" max="90" step="5" oninput="calcServicos()" />
+          </div>
+          <div class="field">
+            <label>Custo médio por tarefa feita por humano (R$)</label>
+            <input type="number" id="custoHumanoTarefa" value="8.50" min="0.5" step="0.5" oninput="calcServicos()" />
+          </div>
+          <div class="field">
+            <label>Custo médio por tarefa automatizada com IA/fluxo (R$)</label>
+            <input type="number" id="custoIATarefa" value="0.65" min="0.05" step="0.05" oninput="calcServicos()" />
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Ganho em Eficiência e Foco</h2>
+          <div class="grid-3">
+            <div class="kpi">
+              <div class="label">Tarefas via IA / Automação</div>
+              <div class="value" id="qtdIA">-</div>
+              <div class="sub" id="qtdHumano">-</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Economia Mensal com IA</div>
+              <div class="value good" id="economiaIA">-</div>
+              <div class="sub">Em tarefas repetitivas de baixo valor</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Custo Operacional Total</div>
+              <div class="value" id="custoTotalServicos">-</div>
+              <div class="sub">IA + equipe focada em exceções</div>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo de Serviço</th>
+                <th>Quem Executa</th>
+                <th>Foco Estratégico</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Status de pedido, NF-e, agendamento e FAQ</td>
+                <td><strong>IA / Automação</strong></td>
+                <td>Escala, velocidade e redução de custo</td>
+              </tr>
+              <tr>
+                <td>Triagem de exceções, cotações e alertas</td>
+                <td><strong>IA + Humano</strong></td>
+                <td>Agilidade com validação de regra</td>
+              </tr>
+              <tr>
+                <td>Negociação crítica, avarias graves e clientes-chave</td>
+                <td><strong>Humano</strong></td>
+                <td>Julgamento, margem e relacionamento</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const fmtBRL = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    const fmtNum = (v) => Math.round(v).toLocaleString("pt-BR");
+
+    function openTab(id, btn) {
+      document.querySelectorAll(".tab-content").forEach((el) => el.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach((el) => el.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      btn.classList.add("active");
+    }
+
+    function calcFrota() {
+      const km = parseFloat(document.getElementById("kmMensal").value) || 0;
+      const fixo = parseFloat(document.getElementById("custoFixoFrota").value) || 0;
+      const varFrota = parseFloat(document.getElementById("custoVarFrota").value) || 0;
+      const tarifa3 = parseFloat(document.getElementById("tarifaTerceiro").value) || 0;
+      const pctFixa = Math.min(100, Math.max(0, parseFloat(document.getElementById("pctRotaFixa").value) || 0)) / 100;
+
+      const diffKm = tarifa3 - varFrota;
+      const breakEven = diffKm > 0 ? fixo / diffKm : 0;
+
+      const kmPropria = km * pctFixa;
+      const kmTerceiro = km - kmPropria;
+
+      const custo100Terceiro = km * tarifa3;
+      const custoMix = (kmPropria > 0 ? fixo + kmPropria * varFrota : 0) + kmTerceiro * tarifa3;
+      const economia = Math.max(0, custo100Terceiro - custoMix);
+
+      document.getElementById("breakEvenKm").textContent = diffKm > 0 ? `${fmtNum(breakEven)} km` : "N/A";
+      document.getElementById("custo100Terceiro").textContent = fmtBRL(custo100Terceiro);
+      document.getElementById("custoPorKmTerceiro").textContent = `${fmtBRL(tarifa3)}/km na terceirizada`;
+      document.getElementById("economiaFrota").textContent = fmtBRL(economia);
+      document.getElementById("custoMixAtual").textContent = `Mix: ${fmtBRL(custoMix)}/mês`;
+
+      const rec = diffKm > 0 && km > breakEven
+        ? `Com ${fmtNum(km)} km/mês (acima do ponto de equilíbrio de ${fmtNum(breakEven)} km), usar frota própria nas rotas recorrentes (${Math.round(pctFixa*100)}%) e terceirizar os picos/rotas variáveis economiza ${fmtBRL(economia)}/mês frente à terceirização total.`
+        : `Abaixo do ponto de equilíbrio (${fmtNum(breakEven)} km/mês), terceirizar por km evita absorver custo fixo ocioso — reservando frota própria apenas para rotas dedicadas de altíssima frequência.`;
+
+      document.getElementById("decisaoFrota").textContent = rec;
+    }
+
+    function calcProducao() {
+      const demanda = parseFloat(document.getElementById("demandaProd").value) || 0;
+      const pctInt = Math.min(100, Math.max(0, parseFloat(document.getElementById("pctInterno").value) || 0)) / 100;
+      const cInt = parseFloat(document.getElementById("custoUnitInterno").value) || 0;
+      const cTer = parseFloat(document.getElementById("custoUnitTerceiro").value) || 0;
+      const consDia = Math.max(1, parseFloat(document.getElementById("consumoDia").value) || 1);
+
+      const qtdInt = demanda * pctInt;
+      const qtdExt = demanda - qtdInt;
+      const custoTotal = qtdInt * cInt + qtdExt * cTer;
+      const custoMedio = demanda > 0 ? custoTotal / demanda : 0;
+      const diasAutonomia = qtdInt / consDia;
+
+      document.getElementById("qtdInterna").textContent = `${fmtNum(qtdInt)} un`;
+      document.getElementById("qtdExterna").textContent = `Terceirizado: ${fmtNum(qtdExt)} un`;
+      document.getElementById("diasAutonomia").textContent = `${diasAutonomia.toFixed(1)} dias`;
+      document.getElementById("custoTotalProd").textContent = fmtBRL(custoTotal);
+      document.getElementById("custoMedioProd").textContent = `Médio: ${fmtBRL(custoMedio)}/un`;
+
+      document.getElementById("decisaoProducao").textContent =
+        `Mantendo ${Math.round(pctInt*100)}% da produção interna com base própria, a operação garante ${diasAutonomia.toFixed(1)} dias de ritmo sem parar mesmo se o parceiro externo atrasar, faltar insumo ou tiver pendência.`;
+    }
+
+    function calcServicos() {
+      const vol = parseFloat(document.getElementById("volTarefas").value) || 0;
+      const pctIA = Math.min(95, Math.max(0, parseFloat(document.getElementById("pctIA").value) || 0)) / 100;
+      const cHum = parseFloat(document.getElementById("custoHumanoTarefa").value) || 0;
+      const cIA = parseFloat(document.getElementById("custoIATarefa").value) || 0;
+
+      const qtdIA = vol * pctIA;
+      const qtdHum = vol - qtdIA;
+      const custoSemIA = vol * cHum;
+      const custoComIA = qtdIA * cIA + qtdHum * cHum;
+      const economia = Math.max(0, custoSemIA - custoComIA);
+
+      document.getElementById("qtdIA").textContent = `${fmtNum(qtdIA)} tarefas`;
+      document.getElementById("qtdHumano").textContent = `Humano: ${fmtNum(qtdHum)} tarefas`;
+      document.getElementById("economiaIA").textContent = fmtBRL(economia);
+      document.getElementById("custoTotalServicos").textContent = fmtBRL(custoComIA);
+    }
+
+    function resetDefaults() {
+      document.getElementById("kmMensal").value = 18000;
+      document.getElementById("custoFixoFrota").value = 14500;
+      document.getElementById("custoVarFrota").value = 2.40;
+      document.getElementById("tarifaTerceiro").value = 3.85;
+      document.getElementById("pctRotaFixa").value = 65;
+
+      document.getElementById("demandaProd").value = 4000;
+      document.getElementById("pctInterno").value = 40;
+      document.getElementById("custoUnitInterno").value = 42.00;
+      document.getElementById("custoUnitTerceiro").value = 37.50;
+      document.getElementById("consumoDia").value = 160;
+
+      document.getElementById("volTarefas").value = 6000;
+      document.getElementById("pctIA").value = 60;
+      document.getElementById("custoHumanoTarefa").value = 8.50;
+      document.getElementById("custoIATarefa").value = 0.65;
+
+      calcFrota();
+      calcProducao();
+      calcServicos();
+    }
+
+    calcFrota();
+    calcProducao();
+    calcServicos();
+  </script>
+</body>
+</html>
